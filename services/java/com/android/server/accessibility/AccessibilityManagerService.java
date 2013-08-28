@@ -1841,7 +1841,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (!mIsAutomation) {
                 mContext.unbindService(this);
             } else {
-                userState.destroyUiAutomationService();
+                userState.destroyUiAutomationServiceLocked();
             }
             removeServiceLocked(this, userState);
             resetLocked();
@@ -2274,7 +2274,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     // the state based on values in the settings database.
                     userState.mInstalledServices.remove(mAccessibilityServiceInfo);
                     userState.mEnabledServices.remove(mComponentName);
-                    userState.destroyUiAutomationService();
+                    userState.destroyUiAutomationServiceLocked();
                 }
             }
         }
@@ -2961,11 +2961,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 new DeathRecipient() {
             @Override
             public void binderDied() {
-                mUiAutomationServiceOwner.unlinkToDeath(
-                        mUiAutomationSerivceOnwerDeathRecipient, 0);
-                mUiAutomationServiceOwner = null;
-                if (mUiAutomationService != null) {
-                    mUiAutomationService.binderDied();
+                synchronized (mLock) {
+                    if (mUiAutomationServiceOwner != null) {
+                        mUiAutomationServiceOwner.unlinkToDeath(
+                                mUiAutomationSerivceOnwerDeathRecipient, 0);
+                        mUiAutomationServiceOwner = null;
+                    }
+                    if (mUiAutomationService != null) {
+                        mUiAutomationService.binderDied();
+                    }
                 }
             }
         };
@@ -3012,7 +3016,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mIsDisplayMagnificationEnabled = false;
         }
 
-        public void destroyUiAutomationService() {
+        public void destroyUiAutomationServiceLocked() {
             mUiAutomationService = null;
             mUiAutomationServiceClient = null;
             if (mUiAutomationServiceOwner != null) {
