@@ -3753,6 +3753,20 @@ public final class Settings {
                 "volume_keys_control_ring_stream";
 
         /**
+         * Whether to display the gesture anywhere trigger region or not.
+         * @hide
+         */
+        @ChaosLab(name="Identicons", classification=Classification.NEW_FIELD)
+        public static final String IDENTICONS_ENABLED = "identicons_enabled";
+
+        /**
+         * Identicons style setting.
+         * @hide
+         */
+        @ChaosLab(name="Identicons", classification=Classification.NEW_FIELD)
+        public static final String IDENTICONS_STYLE = "identicons_style";
+
+        /**
          * The statusbar configuration to be used for its creation in SystemUI
          * Fallback is the config_statusBarComponent value
          * @hide
