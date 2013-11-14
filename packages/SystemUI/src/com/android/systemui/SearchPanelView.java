@@ -83,7 +83,6 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     private float mStartTouch;
     private float mStartDrag;
     private boolean mLaunchPending;
-    private SettingsObserver mSettingsObserver;
 
     public SearchPanelView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -360,6 +359,5 @@ public class SearchPanelView extends FrameLayout implements StatusBarPanel {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mSettingsObserver.observe();
     }
 }
