@@ -465,10 +465,9 @@ public class ActivityManager {
      * @hide
      */
     static public boolean isHighEndGfx() {
-        if (GFXAccelCheck || isForcedHighEndGfx()) {
-                        return false;
-        }
-        return true;
+        return (!isLowRamDeviceStatic() &&
+                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel))
+                || isForcedHighEndGfx();
     }
 
     /**
