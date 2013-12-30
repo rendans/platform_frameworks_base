@@ -3410,7 +3410,14 @@ public final class Settings {
         public static final String CUSTOM_SCROLL_FRICTION = "custom_scroll_friction";
 
         /**
+         * Whether to remove the sound from phone ringing during quiet hours.
+         * @hide
+         */
+        public static final String QUIET_HOURS_RINGER = "quiet_hours_ringer";
+
+        /**
          * Determine custom fling velocity.
+         *
          * @hide
          */
         public static final String CUSTOM_FLING_VELOCITY = "custom_fling_velocity";

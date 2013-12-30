@@ -1514,11 +1514,11 @@ public class NotificationManagerService extends INotificationManager.Stub
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QUIET_HOURS_DIM),
                     false, this, UserHandle.USER_ALL);
-
             update(null);
         }
 
-        @Override public void onChange(boolean selfChange, Uri uri) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
             update(uri);
             updateNotificationPulse();
         }
@@ -2562,10 +2562,9 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
         }
 
-        // Don't flash while we are in a call, screen is
-        // on or we are in quiet hours with light dimmed
-        if (mLedNotification == null || mInCall || mScreenOn
-                || (QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM))) {
+        // Don't flash while we are in a call or screen is on or its disabled
+        if (mLedNotification == null || mInCall || mScreenOn || !mNotificationPulseEnabled ||
+            (QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM))) {
             mNotificationLight.turnOff();
         } else if (mNotificationPulseEnabled) {
             final Notification ledno = mLedNotification.sbn.getNotification();
