@@ -126,7 +126,7 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
     static class BrightnessState extends State {
         boolean autoBrightness;
     }
-    static class QuiteHourState extends State {
+    static class QuietHourState extends State {
         boolean isEnabled;
         boolean isPaused;
         boolean isForced;
@@ -492,14 +492,19 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
     private BroadcastReceiver mQuietHoursIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onQuiteHourChanged();
+            onQuietHourChanged();
         }
     };
 
     /** ContentObserver to watch quitehour **/
-    private class QuiteHourObserver extends ContentObserver {
-        public QuiteHourObserver(Handler handler) {
+    private class QuietHourObserver extends ContentObserver {
+        public QuietHourObserver(Handler handler) {
             super(handler);
+        }
+   
+        @Override
+        public void onChange(boolean selfChange) {
+            onQuietHourChanged();
         }
 
         public void startObserving() {
@@ -557,7 +562,7 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BrightnessObserver mBrightnessObserver;
     private final NetAdbObserver mNetAdbObserver;
     private final OnTheGoObserver mOnTheGoObserver;
-    private final QuiteHourObserver mQuietHourObserver;
+    private final QuietHourObserver mQuietHourObserver;
     private final NetworkObserver mMobileNetworkObserver;
     private final RingerObserver mRingerObserver;
     private final SleepTimeObserver mSleepTimeObserver;
@@ -689,7 +694,7 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private QuickSettingsTileView mQuietHourTile;
     private RefreshCallback mQuietHourCallback;
-    private QuiteHourState mQuietHourState = new QuiteHourState();
+    private QuietHourState mQuietHourState = new QuietHourState();
 
     private QuickSettingsTileView mBugreportTile;
     private RefreshCallback mBugreportCallback;
@@ -784,7 +789,7 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
         mNetAdbObserver.startObserving();
         mOnTheGoObserver = new OnTheGoObserver(mHandler);
         mOnTheGoObserver.startObserving();
-        mQuietHourObserver = new QuiteHourObserver(mHandler);
+        mQuietHourObserver = new QuietHourObserver(mHandler);
         mQuietHourObserver.startObserving();
         mMobileNetworkObserver = new NetworkObserver(mHandler);
         mMobileNetworkObserver.startObserving();
@@ -882,6 +887,7 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshSleepTimeTile();
         refreshLocationExtraTile();
         refreshImmersiveGlobalTile();
+        refreshQuietHourTile();
         refreshImmersiveModeTile();
         refreshWifiApTile();
         onOnTheGoChanged();
@@ -1989,51 +1995,14 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
         mNetAdbCallback.refreshView(mNetAdbTile, mNetAdbState);
     }
 
-    private void setImmersiveLastActiveState(int style) {
-        Settings.System.putIntForUser(mContext.getContentResolver(),
-                Settings.System.IMMERSIVE_LAST_ACTIVE_STATE, style
-                , UserHandle.USER_CURRENT);
-    }
-
-    private void switchImmersiveFront() {
-        int mode = getImmersiveMode();
-        immersiveModeLastState = getImmersiveLastActiveState();
-        switch (mode) {
-               case IMMERSIVE_MODE_OFF:
-                    setImmersiveMode(immersiveModeLastState);
-                    break;
-               case IMMERSIVE_MODE_FULL:
-               case IMMERSIVE_MODE_HIDE_ONLY_NAVBAR:
-               case IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR:
-                    setImmersiveMode(IMMERSIVE_MODE_OFF);
-                    break;
-        }
-    }
-
-    private void switchImmersiveBack() {
-        int mode = getImmersiveMode();
-        switch (mode) {
-                case IMMERSIVE_MODE_FULL:
-                     setImmersiveMode(IMMERSIVE_MODE_HIDE_ONLY_NAVBAR);
-                     break;
-                case IMMERSIVE_MODE_HIDE_ONLY_NAVBAR:
-                     setImmersiveMode(IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR);
-                     break;
-                case IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR:
-                     collapsePanels();
-                     setImmersiveMode(IMMERSIVE_MODE_FULL);
-                     break;
-        }
-    }
-
     // QuietHour
     void addQuietHourTile(QuickSettingsTileView view, RefreshCallback cb) {
         mQuietHourTile = view;
         mQuietHourCallback = cb;
-        onQuiteHourChanged();
+        onQuietHourChanged();
     }
 
-    private void onQuiteHourChanged() {
+    private void onQuietHourChanged() {
         Resources r = mContext.getResources();
         int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.QUIET_HOURS_ENABLED, 0,
@@ -2067,6 +2036,10 @@ public class QuickSettingsModel implements BluetoothStateChangeCallback,
         if (mQuietHourTile != null) {
             mQuietHourCallback.refreshView(mQuietHourTile, mQuietHourState);
         }
+    }
+
+    void refreshQuietHourTile() {
+        onQuietHourChanged();
     }
 
     // SSL CA Cert warning.
