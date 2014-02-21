@@ -29,6 +29,7 @@ import android.os.UserHandle;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.SystemProperties;
+import android.os.storage.StorageVolume;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -201,8 +202,8 @@ public class StorageNotification extends SystemUI {
              */
             Intent intent = new Intent();
             intent.setClass(mContext, com.android.internal.app.ExternalMediaFormatActivity.class);
-            // send the volume's path through to the formatting activity
-            intent.putExtra(com.android.internal.app.ExternalMediaFormatActivity.FORMAT_PATH, path);
+            intent.putExtra(StorageVolume.EXTRA_STORAGE_VOLUME,
+                    getVolumeByPath(mStorageManager.getVolumeList(), path));
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
 
             setMediaStorageNotification(
@@ -217,8 +218,8 @@ public class StorageNotification extends SystemUI {
              */
             Intent intent = new Intent();
             intent.setClass(mContext, com.android.internal.app.ExternalMediaFormatActivity.class);
-            // send the volume's path through to the formatting activity
-            intent.putExtra(com.android.internal.app.ExternalMediaFormatActivity.FORMAT_PATH, path);
+            intent.putExtra(StorageVolume.EXTRA_STORAGE_VOLUME,
+                    getVolumeByPath(mStorageManager.getVolumeList(), path));
             PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
 
             setMediaStorageNotification(
@@ -251,6 +252,19 @@ public class StorageNotification extends SystemUI {
         } else {
             Log.w(TAG, String.format("Ignoring unknown state {%s}", newState));
         }
+    }
+
+    /**
+     * Get the corresponding StorageVolume object for a specific path.
+     */
+    private final StorageVolume getVolumeByPath(StorageVolume[] volumes, String path) {
+        for (StorageVolume volume : volumes) {
+            if (volume.getPath().equals(path)) {
+                return volume;
+            }
+        }
+        Log.w(TAG, "No storage found");
+        return null;
     }
 
     /**
