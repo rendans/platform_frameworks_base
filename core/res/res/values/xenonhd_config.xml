@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-/* Copyright 2014, SlimRoms project
+/* Copyright 2014, crDroid Android project
 ** Copyright 2014, Team Horizon
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,13 +16,11 @@
 ** limitations under the License.
 */
 -->
-<resources>
 
-  <java-symbol type="bool" name="config_doze_enabled_by_default" />
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds.  Do not translate. -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-  <!-- Config Power Menu -->
-  <java-symbol type="drawable" name="ic_lock_screen_record" />
-  <java-symbol type="string" name="global_action_screen_record" />
-  <java-symbol type="bool" name="config_enableScreenrecordChord" />
-
+    <!-- If this is true, key chords can be used to take a screen record on the device. -->
+    <bool name="config_enableScreenrecordChord">true</bool>
 </resources>
