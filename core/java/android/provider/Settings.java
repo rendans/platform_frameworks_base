@@ -3519,6 +3519,11 @@ public final class Settings {
          */
         public static final String QUIET_HOURS_PAUSED = "quiet_hours_paused";
 
+         /**
+         * @hide
+         */
+        public static final String RECENTS_PANEL_COLOR = "recents_panel_color";
+
         /**
          * Whether to force on quiet hours for the moment
          * @hide
