@@ -123,6 +123,7 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.internal.util.slim.QuietHoursHelper;
 
 import com.android.internal.util.omni.OmniTorchConstants;
 
@@ -163,6 +164,7 @@ class QuickSettings {
         BLUETOOTH,
         LOCATION,
         IMMERSIVE,
+        QUIETHOUR,
         SLEEP,
         SYNC,
         NETADB,
@@ -189,6 +191,7 @@ class QuickSettings {
         + DELIMITER + Tile.BLUETOOTH
         + DELIMITER + Tile.LOCATION 
         + DELIMITER + Tile.IMMERSIVE 
+        + DELIMITER + Tile.QUIETHOUR
         + DELIMITER + Tile.SLEEP
         + DELIMITER + Tile.SYNC 
         + DELIMITER + Tile.NETADB
@@ -200,7 +203,6 @@ class QuickSettings {
         + DELIMITER + Tile.CAMERA
         + DELIMITER + Tile.MUSIC
         + DELIMITER + Tile.FCHARGE;
-
 
     private Context mContext;
     private PanelBar mBar;
@@ -921,6 +923,83 @@ class QuickSettings {
                   });
                   parent.addView(SyncTile);
                   if (addMissing) SyncTile.setVisibility(View.GONE);
+               } else if (Tile.QUIETHOUR.toString().equals(tile.toString())) { // Quiet hours tile
+                  // Quiet hours mode
+                  final QuickSettingsBasicTile quietHourTile
+                       = new QuickSettingsBasicTile(mContext);
+
+                  quietHourTile.setTileId(Tile.QUIETHOUR);
+                  quietHourTile.setImageResource(R.drawable.ic_qs_quiet_hours_off);
+                  quietHourTile.setText(mContext.getString(R.string.quick_settings_quiethours_off_label));
+                  quietHourTile.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                          boolean enabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                                  Settings.System.QUIET_HOURS_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
+                          boolean paused = Settings.System.getIntForUser(mContext.getContentResolver(),
+                                  Settings.System.QUIET_HOURS_PAUSED, 0, UserHandle.USER_CURRENT) != 0;
+                          boolean forced = Settings.System.getIntForUser(mContext.getContentResolver(),
+                                  Settings.System.QUIET_HOURS_FORCED, 0, UserHandle.USER_CURRENT) != 0;
+                          boolean isActive = QuietHoursHelper.inQuietHours(mContext, null);
+
+                          // init quiet hours if required - service has never been started so far
+                          Intent intent = new Intent(QuietHoursHelper.SCHEDULE_SERVICE_COMMAND);
+                          mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
+
+                          if (enabled){
+                              if (isActive){
+                                  // disable force if it was force started
+                                  if (forced){
+                                      Settings.System.putIntForUser(mContext.getContentResolver(),
+                                             Settings.System.QUIET_HOURS_FORCED, 0,
+                                             UserHandle.USER_CURRENT);
+                                  } else {
+                                      // time active
+                                      Settings.System.putIntForUser(mContext.getContentResolver(),
+                                             Settings.System.QUIET_HOURS_PAUSED, 1,
+                                             UserHandle.USER_CURRENT);
+                                  }
+                              } else {
+                                  if (paused){
+                                      Settings.System.putIntForUser(mContext.getContentResolver(),
+                                             Settings.System.QUIET_HOURS_PAUSED, 0,
+                                             UserHandle.USER_CURRENT);
+                                  } else {
+                                      // if not time active - start now
+                                      Settings.System.putIntForUser(mContext.getContentResolver(),
+                                              Settings.System.QUIET_HOURS_FORCED, 1,
+                                              UserHandle.USER_CURRENT);
+                                  }
+                              }
+                          } else {
+                              // if not enabled - enable
+                              Settings.System.putIntForUser(mContext.getContentResolver(),
+                                      Settings.System.QUIET_HOURS_ENABLED, 1, UserHandle.USER_CURRENT);
+                          }
+                      }
+                  });
+                  quietHourTile.setOnLongClickListener(new View.OnLongClickListener() {
+                      @Override
+                      public boolean onLongClick(View v) {
+                          Intent intent = new Intent(Intent.ACTION_MAIN);
+                          intent.setClassName("com.android.settings",
+                                 "com.android.settings.Settings$QuietHoursSettingsActivity");
+                          startSettingsActivity(intent);
+                          return true;
+                      }
+                  });
+
+                  mModel.addQuietHourTile(quietHourTile,
+                        new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView unused, State state) {
+                            quietHourTile.setImageResource(state.iconId);
+                            quietHourTile.setText(state.label);
+                        }
+                  });
+
+                  parent.addView(quietHourTile);
+                  if (addMissing) quietHourTile.setVisibility(View.GONE);
                 } else if(Tile.BATTERY.toString().equals(tile.toString())) { // Battery tile
                     batteryTile = new QuickSettingsBasicBatteryTile(mContext);
                     batteryTile.setTileId(Tile.BATTERY);
