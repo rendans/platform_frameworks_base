@@ -1896,7 +1896,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             }
                             options = null;
                             movedToFront = true;
-                        }
+                        }             
                     }
                     // If the caller has requested that the target task be
                     // reset, then do so.
