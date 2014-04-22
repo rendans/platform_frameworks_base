@@ -3297,6 +3297,13 @@ public final class Settings {
         public static final String ANIMATION_IME_EXIT = "animation_ime_exit";
 
         /**
+         * Settings: Whether to force multi pane mode for Settings
+         *
+         * @hide
+         */
+        public static final String FORCE_MULTI_PANE = "force_multi_pane";
+
+        /**
          *
          * @hide
          */
