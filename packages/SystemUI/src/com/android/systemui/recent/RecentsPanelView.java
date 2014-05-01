@@ -122,6 +122,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     TextView mBackgroundProcessText;
     TextView mForegroundProcessText;
 
+    private long mFreeMemory;
+    private long mTotalMemory;
+    private long mCachedMemory;
+    private long mActiveMemory;
+
     Handler mHandler = new Handler();
     ActivityManager mAm;
     ActivityManager.MemoryInfo mMemInfo;
@@ -494,11 +499,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public void dismiss() {
-        ((RecentsActivity) mContext).dismissAndGoHome();
+        mRecentsActivity.dismissAndGoHome();
     }
 
     public void dismissAndGoBack() {
-        ((RecentsActivity) mContext).dismissAndGoBack();
+        mRecentsActivity.dismissAndGoBack();
     }
 
     public void onAnimationCancel(Animator animation) {
@@ -823,7 +828,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         } else {
             mRecentTaskDescriptions.addAll(tasks);
         }
-        if (((RecentsActivity) mContext).isActivityShowing()) {
+        if (mRecentsActivity.isActivityShowing()) {
             refreshViews();
         }
         mHandler.post(updateRamBarTask);
@@ -890,7 +895,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     opts);
         } else {
             boolean backPressed = mRecentsActivity != null && mRecentsActivity.mBackPressed;
-            if (!floating  || !backPressed) {
+            if (!floating || !backPressed) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                         | Intent.FLAG_ACTIVITY_TASK_ON_HOME
                         | Intent.FLAG_ACTIVITY_NEW_TASK);
