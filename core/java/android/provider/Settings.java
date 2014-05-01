@@ -5830,6 +5830,36 @@ public final class Settings {
         public static final int INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT =
                 INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF;
 
+         /**
+         * What happens when the user presses the Home button when the
+         * phone is in a call.<br/>
+         * <b>Values:</b><br/>
+         * 1 - Nothing happens. (Default behavior)<br/>
+         * 2 - The Home button hangs up the current call.<br/>
+         *
+         * @hide
+         */
+        public static final String INCALL_HOME_BUTTON_BEHAVIOR = "ring_home_button_behavior";
+
+        /**
+         * INCALL_HOME_BUTTON_BEHAVIOR value for "do nothing".
+         * @hide
+         */
+        public static final int INCALL_HOME_BUTTON_BEHAVIOR_DO_NOTHING = 0x1;
+
+        /**
+         * INCALL_HOME_BUTTON_BEHAVIOR value for "hang up".
+         * @hide
+         */
+        public static final int INCALL_HOME_BUTTON_BEHAVIOR_HANGUP = 0x2;
+
+        /**
+         * INCALL_HOME_BUTTON_BEHAVIOR default value.
+         * @hide
+         */
+        public static final int INCALL_HOME_BUTTON_BEHAVIOR_DEFAULT =
+                INCALL_HOME_BUTTON_BEHAVIOR_DO_NOTHING;
+
         /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per

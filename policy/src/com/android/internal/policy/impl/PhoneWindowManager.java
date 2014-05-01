@@ -523,6 +523,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Behavior of POWER button while in-call and screen on.
     // (See Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR.)
     int mIncallPowerBehavior;
+    int mIncallHomeBehavior;
 
     Display mDisplay;
     
@@ -632,6 +633,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.INCALL_HOME_BUTTON_BEHAVIOR), false, this, 
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION), false, this,
@@ -1471,6 +1475,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mIncallPowerBehavior = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
+                    UserHandle.USER_CURRENT);
+            mIncallHomeBehavior = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.INCALL_HOME_BUTTON_BEHAVIOR,
+                    Settings.Secure.INCALL_HOME_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
             mImmersiveModeStyle = Settings.System.getIntForUser(resolver,
                     Settings.System.IMMERSIVE_MODE, 0, UserHandle.USER_CURRENT);
@@ -4779,8 +4787,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 // Pressing Power while there's a ringing incoming
                                 // call should silence the ringer.
                                 telephonyService.silenceRinger();
-                            } else if ((mIncallPowerBehavior
-                                    & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
+                            } else if (((mIncallPowerBehavior
+                                    & (Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP))
+                                    |(mIncallHomeBehavior 
+                                    & (Settings.Secure.INCALL_HOME_BUTTON_BEHAVIOR_HANGUP))) != 0
                                     && telephonyService.isOffhook() && isScreenOn) {
                                 // Otherwise, if "Power button ends call" is enabled,
                                 // the Power button will hang up any current active call.
@@ -6282,6 +6292,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
         pw.print(prefix); pw.print("mEndcallBehavior="); pw.print(mEndcallBehavior);
                 pw.print(" mIncallPowerBehavior="); pw.print(mIncallPowerBehavior);
+                pw.print(" mIncallHomeBehavior="); pw.print(mIncallHomeBehavior);
                 pw.print(" mLongPressOnHomeBehavior="); pw.println(mLongPressOnHomeBehavior);
                 pw.print(" mDoubleTapOnHomeBehavior="); pw.println(mDoubleTapOnHomeBehavior);
         pw.print(prefix); pw.print("mLandscapeRotation="); pw.print(mLandscapeRotation);
