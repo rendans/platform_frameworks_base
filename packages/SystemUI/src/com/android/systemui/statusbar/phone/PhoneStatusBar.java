@@ -3369,6 +3369,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mRecreating = false;
+
+        updateHalo();
     }
 
     private void removeAllViews(ViewGroup parent) {
