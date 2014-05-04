@@ -3660,8 +3660,14 @@ public final class Settings {
         public static final String UI_FORCE_OVERFLOW_BUTTON = "ui_force_overflow_button";
 
         /**
-         * Whether to enable swiping your finger across the statusbar to change the brightness.
-         * Boolean value. Defaults to true.
+         * Halo notifications on floating windows or not
+         * @hide
+         */
+        public static final String FLOATING_MODE = "floating_mode";
+
+        /**
+         * Show brightness slider in notification panel
+         * @hide
          */
         public static final String STATUSBAR_ENABLE_BRIGHTNESS_SLIDER = "statusbar_enable_brightness_slider";
 
