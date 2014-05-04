@@ -2748,6 +2748,14 @@ public final class Settings {
                 "active_display_hide_low_priority_notifications";
 
         /**
+         * In call dialpad state.
+         * 0 = hidden
+         * 1 = showing
+         * @hide
+         */
+        public static final String DIALPAD_STATE = "dialpad_state";
+
+        /**
          * Whether to display AM/PM after time when in 12h format
          * @hide
          */
