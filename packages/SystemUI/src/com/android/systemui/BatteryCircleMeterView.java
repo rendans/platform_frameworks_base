@@ -193,7 +193,7 @@ public class BatteryCircleMeterView extends ImageView {
     private void drawCircle(Canvas canvas, int level, int animOffset, float textX, RectF drawRect) {
         Paint usePaint = mPaintSystem;
 
-        // turn red at 14% - same level android battery warning appears
+        // turn red when battery is at warning level - same level android battery warning appears
         if (level <= 14) {
             usePaint = mPaintRed;
         }
