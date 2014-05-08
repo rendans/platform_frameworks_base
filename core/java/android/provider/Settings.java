@@ -3526,6 +3526,11 @@ public final class Settings {
         public static final String QUIET_HOURS_FORCED = "quiet_hours_forced";
 
         /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_WHITELIST = "quiet_hours_whitelist";
+
+        /**
          * Whether power menu screen record is enabled
          *
          * @hide
