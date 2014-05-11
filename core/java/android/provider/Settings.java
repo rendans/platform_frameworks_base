@@ -2482,13 +2482,6 @@ public final class Settings {
         public static final String BATTERY_LIGHT_FULL_COLOR = "battery_light_full_color";
 
         /**
-         * Disable FC Notifications
-         *
-         * @hide
-         */
-        public static final String DISABLE_FC_NOTIFICATIONS = "disable_fc_notifications";
-
-        /**
          * Setting to enable volume options.
          *
          * @hide

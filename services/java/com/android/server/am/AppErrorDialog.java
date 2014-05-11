@@ -34,12 +34,13 @@ final class AppErrorDialog extends BaseErrorDialog {
 
     // 5-minute timeout, then we automatically dismiss the crash dialog
     static final long DISMISS_TIMEOUT = 1000 * 60 * 5;
-
+    
     public AppErrorDialog(Context context, ActivityManagerService service,
             AppErrorResult result, ProcessRecord app) {
         super(context);
+        
         Resources res = context.getResources();
-
+        
         mService = service;
         mProc = app;
         mResult = result;
@@ -49,7 +50,6 @@ final class AppErrorDialog extends BaseErrorDialog {
             setMessage(res.getString(
                     com.android.internal.R.string.aerr_application,
                     name.toString(), app.info.processName));
-
         } else {
             name = app.processName;
             setMessage(res.getString(
@@ -77,7 +77,6 @@ final class AppErrorDialog extends BaseErrorDialog {
         getWindow().setAttributes(attrs);
         if (app.persistent) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
-
         }
 
         // After the timeout, pretend the user clicked the quit button
