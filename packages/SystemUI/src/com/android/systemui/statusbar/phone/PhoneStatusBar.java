@@ -1712,8 +1712,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 })
                 .start();
         }
-
-        updateCarrierAndWifiLabelVisibility(false);
     }
 
     public void showClock(boolean show) {
@@ -2463,6 +2461,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
 
                 setAreThereNotifications();
+                updateCarrierAndWifiLabelVisibility(false);
             }
 
             // update status bar mode
