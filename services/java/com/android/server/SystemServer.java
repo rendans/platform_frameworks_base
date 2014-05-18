@@ -49,6 +49,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -226,7 +227,7 @@ class ServerThread {
             ServiceManager.addService(Context.POWER_SERVICE, power);
 
             Slog.i(TAG, "Activity Manager");
-            context = ActivityManagerService.main(factoryTest);
+            context = ActivityManagerService.main(factoryTest, power);
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting bootstrap service", e);
