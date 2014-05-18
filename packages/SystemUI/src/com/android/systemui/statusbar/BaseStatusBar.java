@@ -57,15 +57,12 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.SensorManager;
-import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -82,14 +79,12 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SettingConfirmationHelper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -111,25 +106,15 @@ import com.android.systemui.chaos.lab.gestureanywhere.GestureAnywhereView;
 import com.android.systemui.R;
 import com.android.systemui.AOKPSearchPanelView;
 import com.android.systemui.aokp.AppWindow;
-import com.android.systemui.RecentsComponent;
-import com.android.systemui.recent.RecentsActivity;
-import com.android.systemui.recent.RecentTasksLoader;
-import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
-import com.android.systemui.statusbar.pie.PieControlPanel;
-import com.android.systemui.statusbar.pie.PieController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.slimrecent.RecentController;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.halo.Halo;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView;
-import com.android.systemui.statusbar.SignalClusterView;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -183,24 +168,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mCurrentUserId = 0;
 
-    // Pie controls
-    protected PieController mPieController;
-    public int mOrientation = 0;
-
-    // Pie policy
-    public NetworkController mNetworkController;
-    public BatteryController mBatteryController;
-    public SignalClusterView mSignalCluster;
-    public Clock mClock;
-
     private RecentController cRecents;
 
     private RecentsComponent mRecents;
-
-    public Handler getHandler() {
-        return mHandler;
-    }
-    private OrientationEventListener mOrientationListener;
 
     protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
@@ -264,10 +234,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mDeviceProvisioned;
     }
 
-   public int getNotificationCount() {
-        return mNotificationData.size();
-    }
-
     private ContentObserver mProvisioningObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
@@ -289,12 +255,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.IMMERSIVE_MODE), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PIE_STATE), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PIE_GRAVITY), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.PIE_MODE), false, this);
             update();
         }
 
@@ -305,14 +265,10 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         private void update() {
             ContentResolver resolver = mContext.getContentResolver();
-            mImmersiveModeStyle = Settings.System.getIntForUser(resolver,
-                    Settings.System.IMMERSIVE_MODE, 0, UserHandle.USER_CURRENT);
-            boolean pieEnabled = Settings.System.getIntForUser(resolver,
-                    Settings.System.PIE_STATE, 0, UserHandle.USER_CURRENT) == 1;
-
-            updatePieControls(!pieEnabled);
-        }
-    };
+            mImmersiveModeStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.IMMERSIVE_MODE, 0, UserHandle.USER_CURRENT);
+          }
+      };
 
     private SettingsObserver mSettingsObserver = new SettingsObserver(mHandler);
 
@@ -465,19 +421,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         SettingsObserver settingsObserver = new SettingsObserver(new Handler());
         settingsObserver.observe();
 
-        OrientationEventListener orientationListener
-                = new OrientationEventListener(mContext, SensorManager.SENSOR_DELAY_NORMAL) {
-            @Override
-            public void onOrientationChanged(int orientation) {
-                int rotation = mDisplay.getRotation();
-                if (rotation != mOrientation) {
-                    if (mPieController != null) mPieController.detachPie();
-                    mOrientation = rotation;
-                }
-            }
-        };
-        orientationListener.enable();
-
         // Listen for HALO enabled switch
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.HALO_ENABLED), false, new ContentObserver(new Handler()) {
@@ -573,75 +516,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    public void updatePieControls(boolean reset) {
-        ContentResolver resolver = mContext.getContentResolver();
-
-        if(reset) {
-            Settings.System.putIntForUser(resolver,
-                    Settings.System.PIE_GRAVITY, 0, UserHandle.USER_CURRENT);
-            Settings.System.putIntForUser(resolver,
-                    Settings.System.PIE_MODE, 0, UserHandle.USER_CURRENT);
-            toggleOrientationListener(false);
-        } else {
-            getOrientationListener();
-            toggleOrientationListener(Settings.System.getIntForUser(resolver,
-                    Settings.System.IMMERSIVE_MODE, 0, UserHandle.USER_CURRENT) != 0);
-        }
-
-        if (mPieController == null) {
-            mPieController = PieController.getInstance();
-            mPieController.init(mContext, mWindowManager, this);
-        }
-        int gravity = Settings.System.getInt(resolver,
-                Settings.System.PIE_GRAVITY, 0);
-        mPieController.resetPie(!reset, gravity);
-    }
-
-    public void toggleOrientationListener(boolean enable) {
-        if (mOrientationListener == null) {
-            if (!enable) {
-                // Do nothing if listener has already dropped
-                return;
-            } else {
-                ContentResolver resolver = mContext.getContentResolver();
-                boolean shouldEnable = Settings.System.getIntForUser(resolver,
-                        Settings.System.IMMERSIVE_MODE, 0, UserHandle.USER_CURRENT) != 0 &&
-                        Settings.System.getIntForUser(resolver,
-                        Settings.System.PIE_STATE, 0, UserHandle.USER_CURRENT) == 1;
-                if (shouldEnable) {
-                    // Re-init Orientation listener for later action
-                    getOrientationListener();
-                } else {
-                    return;
-                }
-            }
-        }
-
-        if (enable && mPowerManager.isScreenOn()) {
-            mOrientationListener.enable();
-        } else {
-            mOrientationListener.disable();
-            // if it has been disabled, then don't leave it to
-            // prevent called from PhoneWindowManager
-            mOrientationListener = null;
-        }
-    }
-
-    private void getOrientationListener() {
-        if (mOrientationListener == null)
-            mOrientationListener = new OrientationEventListener(mContext,
-                    SensorManager.SENSOR_DELAY_NORMAL) {
-                @Override
-                public void onOrientationChanged(int orientation) {
-                    int rotation = mDisplay.getRotation();
-                    if (rotation != mOrientation) {
-                        if (mPieController != null) mPieController.detachPie();
-                        mOrientation = rotation;
-                    }
-                }
-            };
-    }
-
     public void userSwitched(int newUserId) {
         // should be overridden
     }
@@ -661,7 +535,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void onConfigurationChanged(Configuration newConfig) {
         final Locale locale = mContext.getResources().getConfiguration().locale;
         final int ld = TextUtils.getLayoutDirectionFromLocale(locale);
-        if (!locale.equals(mLocale) || ld != mLayoutDirection) {
+        if (! locale.equals(mLocale) || ld != mLayoutDirection) {
             if (DEBUG) {
                 Log.v(TAG, String.format(
                         "config changed locale/LD: %s (%d) -> %s (%d)", mLocale, mLayoutDirection,
@@ -928,46 +802,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected abstract View getStatusBarView();
 
-    protected boolean mSwitchingApp = false;
-    private RecentTasksLoader mRecentTasksLoader;
-    protected int mSwitchLastAppHoldoff = 200;
-    private Runnable mSwitchLastApp = new Runnable() {
-        public void run() {
-            int selection = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.RECENTS_SWITCH, 0);
-            if (selection == 0 || selection == 3) {
-                selectSwitchApps();
-            } else {
-                boolean switchApps = selection == 1;
-                if (!switchApps) {
-                    toggleRecentsActivity();
-                } else {
-                    mSwitchingApp = true;
-                    if (mRecentTasksLoader == null) {
-                        mRecentTasksLoader = RecentTasksLoader.getInstance(mContext);
-                    }
-                    TaskDescription task = mRecentTasksLoader.getFirstTask(true);
-                    if (task != null) {
-                        mContext.startActivity(task.getIntent());
-                    } else {
-                        toggleRecentsActivity();
-                    }
-                }
-            }
-        }
-    };
-
-    private void selectSwitchApps() {
-        Resources r = mContext.getResources();
-
-        SettingConfirmationHelper helper = new SettingConfirmationHelper(mContext);
-        helper.showConfirmationDialogForSetting(
-                r.getString(R.string.enable_switch_apps_title),
-                r.getString(R.string.enable_switch_apps_message),
-                r.getDrawable(R.drawable.switch_apps),
-                Settings.System.RECENTS_SWITCH);
-    }
-
     protected View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
         // additional optimization when we have software system buttons - start loading the recent
         // tasks on touch down
@@ -976,20 +810,12 @@ public abstract class BaseStatusBar extends SystemUI implements
             int action = event.getAction() & MotionEvent.ACTION_MASK;
             if (action == MotionEvent.ACTION_DOWN) {
                 preloadRecentTasksList();
-                mSwitchingApp = false;
-                ContentResolver resolver = mContext.getContentResolver();
-                if (!isRecentAppsVisible()) {
-                    mHandler.removeCallbacks(mSwitchLastApp);
-                    mHandler.postDelayed(mSwitchLastApp, mSwitchLastAppHoldoff);
-                }
             } else if (action == MotionEvent.ACTION_CANCEL) {
                 cancelPreloadingRecentTasksList();
-                mHandler.removeCallbacks(mSwitchLastApp);
             } else if (action == MotionEvent.ACTION_UP) {
-                if (!v.isPressed() || mSwitchingApp) {
+                if (!v.isPressed()) {
                     cancelPreloadingRecentTasksList();
                 }
-                mHandler.removeCallbacks(mSwitchLastApp);
 
             }
             return false;

@@ -124,7 +124,8 @@ public class Clock extends TextView implements DemoMode {
         super(context, attrs, defStyle);
     }
 
-    public void startClockReceiver() {
+    @Override
+    protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
         if (!mAttached) {
@@ -151,13 +152,6 @@ public class Clock extends TextView implements DemoMode {
         updateSettings();
         updateView();
     }
-
-     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        startClockReceiver();
-    }
-
 
     @Override
     protected void onDetachedFromWindow() {
