@@ -38,7 +38,6 @@ oneway interface IStatusBar
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
-    void toggleOrientationListener(boolean enable);
     void setWindowState(int window, int state);
     void setAutoRotate(boolean enabled);
 }
