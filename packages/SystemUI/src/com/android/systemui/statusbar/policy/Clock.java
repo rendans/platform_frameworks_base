@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,7 +36,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.systemui.R;
 import com.android.systemui.DemoMode;
 
 import java.text.SimpleDateFormat;
@@ -96,21 +94,7 @@ public class Clock extends TextView implements DemoMode {
 
     protected int mClockStyle = STYLE_CLOCK_RIGHT;
 
-    private ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateSettings();
-            updateView();
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updateSettings();
-            updateView();
-        }
-    };
-
-    protected int mClockColor;
+    protected int mClockColor = com.android.internal.R.color.holo_blue_light;
 
     public Clock(Context context) {
         this(context, null);
@@ -149,17 +133,17 @@ public class Clock extends TextView implements DemoMode {
         // The time zone may have changed while the receiver wasn't registered, so update the Time
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
 
+        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
+        settingsObserver.observe();
         updateSettings();
-        updateView();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (mAttached) {
-            mAttached = false;
             getContext().unregisterReceiver(mIntentReceiver);
-            getContext().getContentResolver().unregisterContentObserver(mSettingsObserver);
+            mAttached = false;
         }
     }
 
@@ -374,12 +358,6 @@ public class Clock extends TextView implements DemoMode {
                 setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
                 break;
         }
-    }
-
-    protected void updateView() {
-        setTextColor(mClockColor);
-        updateClockVisibility();
-        updateClock();
     }
 
     protected void updateClockVisibility() {
