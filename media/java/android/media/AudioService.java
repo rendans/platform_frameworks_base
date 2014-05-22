@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ThemeUtils;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -87,6 +88,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
@@ -4299,16 +4301,16 @@ public class AudioService extends IAudioService.Stub {
                         }
                     }
                 }
-            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
-                state = intent.getIntExtra("state", 0);
-                if (state == 1) {
+//            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+//                state = intent.getIntExtra("state", 0);
+//                if (state == 1) {
                     // Headset plugged in
-                    adjustCurrentStreamVolume();
+//                    adjustCurrentStreamVolume();
                     // TODO: Cap volume at safe levels
-                } else {
+//                } else {
                     // Headset disconnected
-                    adjustCurrentStreamVolume();
-                }
+//                    adjustCurrentStreamVolume();
+//                }
             } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
                            action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
@@ -4430,14 +4432,71 @@ public class AudioService extends IAudioService.Stub {
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int plugged = intent.getIntExtra("state", 0);
-                if(plugged == 1) {
-                    Intent headset=Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
-                        Intent.CATEGORY_APP_MUSIC);
-                    headset.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(headset);
+
+                String headsetPlugIntentUri = Settings.System.getStringForUser(
+                    context.getContentResolver(), 
+                   Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+
+                boolean disableMusicActive = Settings.System.getIntForUser(context.getContentResolver(),
+                    Settings.System.HEADSET_PLUG_MUSIC_ACTIVE, 1, UserHandle.USER_CURRENT) == 1;
+
+                Intent headsetPlugIntent = null;
+                if (plugged == 1) {
+                    adjustCurrentStreamVolume();
+                } else {
+                    adjustCurrentStreamVolume();
+                }
+                if(plugged == 1 && headsetPlugIntentUri != null) {
+                    if (disableMusicActive && isLocalOrRemoteMusicActive()) {
+                        return;
+                    }
+                    // Run default music app 
+                    if(headsetPlugIntentUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)){
+
+                        headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                            Intent.CATEGORY_APP_MUSIC);
+                        headsetPlugIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivityAsUser(headsetPlugIntent, UserHandle.CURRENT);
+                    } else { // Try open a custom app 	4434
+
+                        try {
+                            headsetPlugIntent = Intent.parseUri(headsetPlugIntentUri, 0);
+                        } catch (URISyntaxException e) {
+                            Log.e("HEADSET", "URI Syntax Exception:" + e);
+                            headsetPlugIntent = null;
+                        }
+
+                        if(headsetPlugIntent != null) {
+
+                            String mPackage = headsetPlugIntent.getComponent()
+                                .getPackageName();
+
+                            if (isAvailableApp(mPackage)) {
+                               headsetPlugIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                               context.startActivityAsUser(headsetPlugIntent, UserHandle.CURRENT);
+                            } else {
+                               // Disable setting 
+                               Settings.System.putStringForUser(context.getContentResolver(),
+                                  Settings.System.HEADSET_PLUG_ENABLED, null, UserHandle.USER_CURRENT);
+                            }
+                        }
+                    }
                 }
             }
         }
+
+    private boolean isAvailableApp(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            int enabled = pm.getApplicationEnabledSetting(packageName);
+            return enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
+                enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+        } catch (NameNotFoundException e) {
+            Log.e("HEADSET", "Name Not Found: " + e);
+            return false;
+        }
+    }
 
         private void adjustCurrentStreamVolume() {
             VolumeStreamState streamState;
