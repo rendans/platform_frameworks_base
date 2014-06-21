@@ -3714,6 +3714,12 @@ public final class Settings {
          */
         public static final String RECENTS_SHOW_SEARCH_BAR = "recents_show_search_bar";
 
+         /**
+         * Disable Immersive Message
+         * @hide
+         */
+        public static final String DISABLE_IMMERSIVE_MESSAGE = "disable_immersive_message";
+
         /**
          * Whether to enable voice wakeup.  The value is boolean (1 or 0).
          * @hide
