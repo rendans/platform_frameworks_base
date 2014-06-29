@@ -2366,7 +2366,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             child.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
 
-        setItemViewLayoutParams(child, position);
+        if (mAdapterHasStableIds) {
+            final ViewGroup.LayoutParams vlp = child.getLayoutParams();
+            LayoutParams lp;
+            if (vlp == null) {
+                lp = (LayoutParams) generateDefaultLayoutParams();
+            } else if (!checkLayoutParams(vlp)) {
+                lp = (LayoutParams) generateLayoutParams(vlp);
+            } else {
+                lp = (LayoutParams) vlp;
+            }
+            lp.itemId = mAdapter.getItemId(position);
+            if (lp != vlp) {
+              child.setLayoutParams(lp);
+            }
+        }
 
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
             if (mAccessibilityDelegate == null) {
@@ -6529,7 +6543,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * @return A view from the ScrapViews collection. These are unordered.
          */
         View getScrapView(int position) {
-            if (mViewTypeCount == 1) {
+		if (mViewTypeCount == 1) {
                 return retrieveFromScrap(mCurrentScrap, position);
             } else {
                 final int whichScrap = mAdapter.getItemViewType(position);
