@@ -2512,11 +2512,10 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Draw with hardware renderer.
                 mIsAnimating = false;
-
                 if (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) {
                     mHardwareYOffset = yOffset;
                     mHardwareXOffset = xOffset;
-                    invalidateRoot = true;
+                    mAttachInfo.mHardwareRenderer.invalidateRoot();
                 }
                 mResizeAlpha = resizeAlpha;
 

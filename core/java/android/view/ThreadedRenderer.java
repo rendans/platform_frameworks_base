@@ -275,22 +275,19 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     private void updateRootDisplayList(View view, HardwareDrawCallbacks callbacks) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Record View#draw()");
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "getDisplayList");
         updateViewTreeDisplayList(view);
 
         if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
             HardwareCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
             try {
                 final int saveCount = canvas.save();
+                canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);
                 callbacks.onHardwarePreDraw(canvas);
-
-                canvas.insertReorderBarrier();
                 canvas.drawRenderNode(view.getDisplayList());
-                canvas.insertInorderBarrier();
-
                 callbacks.onHardwarePostDraw(canvas);
-                canvas.restoreToCount(saveCount);
+                canvas.restore();
                 mRootNodeNeedsUpdate = false;
             } finally {
                 mRootNode.end(canvas);
