@@ -833,6 +833,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         startKeyguard();
 
         mDozeServiceHost = new DozeServiceHost();
+<<<<<<< HEAD
         putComponent(DozeHost.class, mDozeServiceHost);
         putComponent(PhoneStatusBar.class, this);
 
@@ -847,6 +848,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     boolean isMSim() {
         return (TelephonyManager.getDefault().getPhoneCount() > 1);
+=======
+        putComponent(DozeService.Host.class, mDozeServiceHost);
+
+        setControllerUsers();
+>>>>>>> e7ae38c... Zen: Return of the alarm warning.
     }
 
     // ================================================================================
@@ -3781,6 +3787,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotifications();
         resetUserSetupObserver();
         setControllerUsers();
+<<<<<<< HEAD
 
         WallpaperManager wm = (WallpaperManager)
                 mContext.getSystemService(Context.WALLPAPER_SERVICE);
@@ -3790,18 +3797,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mNavigationBarView != null) {
             mNavigationBarView.updateSettings();
         }
+=======
+>>>>>>> e7ae38c... Zen: Return of the alarm warning.
     }
 
     private void setControllerUsers() {
         if (mZenModeController != null) {
             mZenModeController.setUserId(mCurrentUserId);
         }
+<<<<<<< HEAD
         if (mBatteryController != null) {
             mBatteryController.setUserId(mCurrentUserId);
         } 
         if (mMSimNetworkController != null) {
             mMSimNetworkController.setUserId(mCurrentUserId);
         }
+=======
+>>>>>>> e7ae38c... Zen: Return of the alarm warning.
     }
 
     private void resetUserSetupObserver() {

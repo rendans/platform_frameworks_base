@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.app.AlarmClockInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -147,7 +148,7 @@ public class ZenModeControllerImpl implements ZenModeController {
 
     @Override
     public long getNextAlarm() {
-        final AlarmManager.AlarmClockInfo info = mAlarmManager.getNextAlarmClock(mUserId);
+        final AlarmClockInfo info = mAlarmManager.getNextAlarmClock(mUserId);
         return info != null ? info.getTriggerTime() : 0;
     }
 
