@@ -92,7 +92,6 @@ public class UserSwitcherController {
         mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter,
                 null /* permission */, null /* scheduler */);
 
-
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING), true,
                 mSettingsObserver);
@@ -114,7 +113,6 @@ public class UserSwitcherController {
      *
      * @param forcePictureLoadForId forces the picture of the given user to be reloaded.
      */
-    @SuppressWarnings("unchecked")
     private void refreshUsers(int forcePictureLoadForId) {
 
         SparseArray<Bitmap> bitmaps = new SparseArray<>(mUsers.size());
@@ -150,6 +148,13 @@ public class UserSwitcherController {
                         guestRecord = new UserRecord(info, null /* picture */,
                                 true /* isGuest */, isCurrent, false /* isAddUser */,
                                 false /* isRestricted */);
+                    } else if (info. isManagedProfile()) {
+                        Bitmap picture = bitmaps.get(info.id);
+                        if (picture == null) {
+                            picture = mUserManager.getUserIcon(info.id);
+                        }
+                        records.add(new UserRecord(info,picture, false, isCurrent));
+        
                     } else if (info.supportsSwitchTo()) {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
@@ -206,7 +211,7 @@ public class UserSwitcherController {
                     notifyAdapters();
                 }
             }
-        }.execute((SparseArray) bitmaps);
+        }.execute((SparseArray)bitmaps);
     }
 
     private void notifyAdapters() {
@@ -245,7 +250,7 @@ public class UserSwitcherController {
 
         if (ActivityManager.getCurrentUser() == id) {
             if (record.isGuest) {
-                showExitGuestDialog(id);
+                exitGuest(id);
             }
             return;
         }
@@ -278,14 +283,8 @@ public class UserSwitcherController {
     }
 
     private void exitGuest(int id) {
-        int newId = UserHandle.USER_OWNER;
-        if (mLastNonGuestUser != UserHandle.USER_OWNER) {
-            UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
-            if (info != null && info.isEnabled() && info.supportsSwitchTo()) {
-                newId = info.id;
-            }
-        }
-        switchToUserId(newId);
+        // TODO: show confirmation dialog
+        switchToUserId(UserHandle.USER_OWNER);
         mUserManager.removeUser(id);
     }
 

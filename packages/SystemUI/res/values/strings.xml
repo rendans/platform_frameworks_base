@@ -938,4 +938,5 @@
     <!-- Hide quick settings tile confirmation button -->
     <string name="quick_settings_reset_confirmation_button">Hide</string>
 
+    <string name="guest_exit_guest">Exit guest</string>
 </resources>
