@@ -2102,6 +2102,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void addLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
+        modifyLegacyRouteForNetId("add", netId, routeInfo, uid);
+    }
+
+    @Override
+    public void removeLegacyRouteForNetId(int netId, RouteInfo routeInfo, int uid) {
+        modifyLegacyRouteForNetId("remove", netId, routeInfo, uid);
+    }
+
+    private void modifyLegacyRouteForNetId(String action, int netId, RouteInfo routeInfo, int uid) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final Command cmd = new Command("network", "route", "legacy", uid, "add", netId);
