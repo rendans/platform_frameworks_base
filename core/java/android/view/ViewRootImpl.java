@@ -1667,7 +1667,10 @@ public final class ViewRootImpl implements ViewParent,
                     // Our surface is gone
                     if (mAttachInfo.mHardwareRenderer != null &&
                             mAttachInfo.mHardwareRenderer.isEnabled()) {
-                        mAttachInfo.mHardwareRenderer.destroy();
+                        // Destroy hardware layers before hardware renderer is destroyed
+                        mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
+
+                        mAttachInfo.mHardwareRenderer.destroy(true);
                     }
                 } else if (surfaceGenerationId != mSurface.getGenerationId() &&
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
