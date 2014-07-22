@@ -60,10 +60,15 @@ public final class CameraManager {
     private static final int API_VERSION_1 = 1;
     private static final int API_VERSION_2 = 2;
 
+    // Access only through getCameraServiceLocked to deal with binder death
+    private ICameraService mCameraService;
+
     private ArrayList<String> mDeviceIdList;
 
     private final Context mContext;
     private final Object mLock = new Object();
+
+    private final CameraServiceListener mServiceListener = new CameraServiceListener();
 
     /**
      * @hide
@@ -72,6 +77,8 @@ public final class CameraManager {
         DEBUG = Log.isLoggable(TAG, Log.DEBUG);
         synchronized(mLock) {
             mContext = context;
+
+            connectCameraServiceLocked();
         }
     }
 
@@ -99,17 +106,11 @@ public final class CameraManager {
      * <p>Registering the same callback again will replace the handler with the
      * new one provided.</p>
      *
-     * <p>The first time a callback is registered, it is immediately called
+     * <p>The first time a listener is registered, it is immediately called
      * with the availability status of all currently known camera devices.</p>
      *
-     * <p>Since this callback will be registered with the camera service, remember to unregister it
-     * once it is no longer needed; otherwise the callback will continue to receive events
-     * indefinitely and it may prevent other resources from being released. Specifically, the
-     * callbacks will be invoked independently of the general activity lifecycle and independently
-     * of the state of individual CameraManager instances.</p>
-     *
-     * @param callback the new callback to send camera availability notices to
-     * @param handler The handler on which the callback should be invoked, or
+     * @param listener The new listener to send camera availability notices to
+     * @param handler The handler on which the listener should be invoked, or
      * {@code null} to use the current thread's {@link android.os.Looper looper}.
      */
     public void registerAvailabilityCallback(AvailabilityCallback callback, Handler handler) {
@@ -122,7 +123,13 @@ public final class CameraManager {
             handler = new Handler(looper);
         }
 
-        CameraManagerGlobal.get().registerAvailabilityCallback(callback, handler);
+        synchronized (mLock) {
+            Handler oldHandler = mListenerMap.put(listener, handler);
+            // For new listeners, provide initial availability information
+            if (oldHandler == null) {
+                mServiceListener.updateListenerLocked(listener, handler);
+            }
+        }
     }
 
     /**
@@ -171,7 +178,7 @@ public final class CameraManager {
              * otherwise get them from the legacy shim instead.
              */
 
-            ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+            ICameraService cameraService = getCameraServiceLocked();
             if (cameraService == null) {
                 throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
                         "Camera service is currently unavailable");
@@ -252,7 +259,7 @@ public final class CameraManager {
                 try {
                     if (supportsCamera2ApiLocked(cameraId)) {
                         // Use cameraservice's cameradeviceclient implementation for HAL3.2+ devices
-                        ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+                        ICameraService cameraService = getCameraServiceLocked();
                         if (cameraService == null) {
                             throw new CameraRuntimeException(
                                 CameraAccessException.CAMERA_DISCONNECTED,
@@ -435,7 +442,7 @@ public final class CameraManager {
     private ArrayList<String> getOrCreateDeviceIdListLocked() throws CameraAccessException {
         if (mDeviceIdList == null) {
             int numCameras = 0;
-            ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+            ICameraService cameraService = getCameraServiceLocked();
             ArrayList<String> deviceIdList = new ArrayList<>();
 
             // If no camera service, then no devices
@@ -521,7 +528,7 @@ public final class CameraManager {
          * Anything else is an unexpected error we don't want to recover from.
          */
         try {
-            ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+            ICameraService cameraService = getCameraServiceLocked();
             // If no camera service, no support
             if (cameraService == null) return false;
 
@@ -538,6 +545,96 @@ public final class CameraManager {
             // API level is not supported
         } catch (RemoteException e) {
             // Camera service is now down, no support for any API level
+        }
+        return false;
+    }
+
+    /**
+     * Connect to the camera service if it's available, and set up listeners.
+     *
+     * <p>Sets mCameraService to a valid pointer or null if the connection does not succeed.</p>
+     */
+    private void connectCameraServiceLocked() {
+        mCameraService = null;
+        IBinder cameraServiceBinder = ServiceManager.getService(CAMERA_SERVICE_BINDER_NAME);
+        if (cameraServiceBinder == null) {
+            // Camera service is now down, leave mCameraService as null
+            return;
+        }
+        try {
+            cameraServiceBinder.linkToDeath(new CameraServiceDeathListener(), /*flags*/ 0);
+        } catch (RemoteException e) {
+            // Camera service is now down, leave mCameraService as null
+            return;
+        }
+
+        ICameraService cameraServiceRaw = ICameraService.Stub.asInterface(cameraServiceBinder);
+
+        /**
+         * Wrap the camera service in a decorator which automatically translates return codes
+         * into exceptions.
+         */
+        ICameraService cameraService = CameraServiceBinderDecorator.newInstance(cameraServiceRaw);
+
+        try {
+            CameraServiceBinderDecorator.throwOnError(
+                    CameraMetadataNative.nativeSetupGlobalVendorTagDescriptor());
+        } catch (CameraRuntimeException e) {
+            handleRecoverableSetupErrors(e, "Failed to set up vendor tags");
+        }
+
+        try {
+            cameraService.addListener(mServiceListener);
+            mCameraService = cameraService;
+        } catch(CameraRuntimeException e) {
+            // Unexpected failure
+            throw new IllegalStateException("Failed to register a camera service listener",
+                    e.asChecked());
+        } catch (RemoteException e) {
+            // Camera service is now down, leave mCameraService as null
+        }
+    }
+
+    /**
+     * Return a best-effort ICameraService.
+     *
+     * <p>This will be null if the camera service
+     * is not currently available. If the camera service has died since the last
+     * use of the camera service, will try to reconnect to the service.</p>
+     */
+    private ICameraService getCameraServiceLocked() {
+        if (mCameraService == null) {
+            Log.i(TAG, "getCameraServiceLocked: Reconnecting to camera service");
+            connectCameraServiceLocked();
+            if (mCameraService == null) {
+                Log.e(TAG, "Camera service is unavailable");
+            }
+        }
+        return mCameraService;
+    }
+
+    /**
+     * Listener for camera service death.
+     *
+     * <p>The camera service isn't supposed to die under any normal circumstances, but can be turned
+     * off during debug, or crash due to bugs.  So detect that and null out the interface object, so
+     * that the next calls to the manager can try to reconnect.</p>
+     */
+    private class CameraServiceDeathListener implements IBinder.DeathRecipient {
+        public void binderDied() {
+            synchronized(mLock) {
+                mCameraService = null;
+                // Tell listeners that the cameras are _available_, because any existing clients
+                // will have gotten disconnected. This is optimistic under the assumption that the
+                // service will be back shortly.
+                //
+                // Without this, a camera service crash while a camera is open will never signal to
+                // listeners that previously in-use cameras are now available.
+                for (String cameraId : mDeviceIdList) {
+                    mServiceListener.onStatusChangedLocked(CameraServiceListener.STATUS_PRESENT,
+                            cameraId);
+                }
+            }
         }
         return false;
     }
@@ -701,14 +798,14 @@ public final class CameraManager {
             }
         }
 
-        private void postSingleUpdate(final AvailabilityCallback callback, final Handler handler,
+        private void postSingleUpdate(final AvailabilityListener listener, final Handler handler,
                 final String id, final int status) {
             if (isAvailable(status)) {
                 handler.post(
                     new Runnable() {
                         @Override
                         public void run() {
-                            callback.onCameraAvailable(id);
+                            listener.onCameraAvailable(id);
                         }
                     });
             } else {
@@ -716,7 +813,7 @@ public final class CameraManager {
                     new Runnable() {
                         @Override
                         public void run() {
-                            callback.onCameraUnavailable(id);
+                            listener.onCameraUnavailable(id);
                         }
                     });
             }
@@ -726,15 +823,22 @@ public final class CameraManager {
          * Send the state of all known cameras to the provided listener, to initialize
          * the listener's knowledge of camera state.
          */
-        private void updateCallbackLocked(AvailabilityCallback callback, Handler handler) {
+        public void updateListenerLocked(AvailabilityListener listener, Handler handler) {
             for (int i = 0; i < mDeviceStatus.size(); i++) {
                 String id = mDeviceStatus.keyAt(i);
                 Integer status = mDeviceStatus.valueAt(i);
-                postSingleUpdate(callback, handler, id, status);
+                postSingleUpdate(listener, handler, id, status);
             }
         }
 
-        private void onStatusChangedLocked(int status, String id) {
+        @Override
+        public void onStatusChanged(int status, int cameraId) throws RemoteException {
+            synchronized(CameraManager.this.mLock) {
+                onStatusChangedLocked(status, String.valueOf(cameraId));
+            }
+        }
+
+        public void onStatusChangedLocked(int status, String id) {
             if (DEBUG) {
                 Log.v(TAG,
                         String.format("Camera id %s has status changed to 0x%x", id, status));
@@ -782,81 +886,14 @@ public final class CameraManager {
                 return;
             }
 
-            final int callbackCount = mCallbackMap.size();
-            for (int i = 0; i < callbackCount; i++) {
-                Handler handler = mCallbackMap.valueAt(i);
-                final AvailabilityCallback callback = mCallbackMap.keyAt(i);
+            final int listenerCount = mListenerMap.size();
+            for (int i = 0; i < listenerCount; i++) {
+                Handler handler = mListenerMap.valueAt(i);
+                final AvailabilityListener listener = mListenerMap.keyAt(i);
 
-                postSingleUpdate(callback, handler, id, status);
+                postSingleUpdate(listener, handler, id, status);
             }
         } // onStatusChangedLocked
 
-        /**
-         * Register a callback to be notified about camera device availability with the
-         * global listener singleton.
-         *
-         * @param callback the new callback to send camera availability notices to
-         * @param handler The handler on which the callback should be invoked. May not be null.
-         */
-        public void registerAvailabilityCallback(AvailabilityCallback callback, Handler handler) {
-            synchronized (mLock) {
-                Handler oldHandler = mCallbackMap.put(callback, handler);
-                // For new callbacks, provide initial availability information
-                if (oldHandler == null) {
-                    updateCallbackLocked(callback, handler);
-                }
-            }
-        }
-
-        /**
-         * Remove a previously-added callback; the callback will no longer receive connection and
-         * disconnection callbacks, and is no longer referenced by the global listener singleton.
-         *
-         * @param callback The callback to remove from the notification list
-         */
-        public void unregisterAvailabilityCallback(AvailabilityCallback callback) {
-            synchronized (mLock) {
-                mCallbackMap.remove(callback);
-            }
-        }
-
-        /**
-         * Callback from camera service notifying the process about camera availability changes
-         */
-        @Override
-        public void onStatusChanged(int status, int cameraId) throws RemoteException {
-            synchronized(mLock) {
-                onStatusChangedLocked(status, String.valueOf(cameraId));
-            }
-        }
-
-        /**
-         * Listener for camera service death.
-         *
-         * <p>The camera service isn't supposed to die under any normal circumstances, but can be
-         * turned off during debug, or crash due to bugs.  So detect that and null out the interface
-         * object, so that the next calls to the manager can try to reconnect.</p>
-         */
-        public void binderDied() {
-            synchronized(mLock) {
-                // Only do this once per service death
-                if (mCameraService == null) return;
-
-                mCameraService = null;
-
-                // Tell listeners that the cameras are _available_, because any existing clients
-                // will have gotten disconnected. This is optimistic under the assumption that
-                // the service will be back shortly.
-                //
-                // Without this, a camera service crash while a camera is open will never signal
-                // to listeners that previously in-use cameras are now available.
-                for (int i = 0; i < mDeviceStatus.size(); i++) {
-                    String cameraId = mDeviceStatus.keyAt(i);
-                    onStatusChangedLocked(STATUS_PRESENT, cameraId);
-                }
-            }
-        }
-
-    } // CameraManagerGlobal
-
+    } // CameraServiceListener
 } // CameraManager

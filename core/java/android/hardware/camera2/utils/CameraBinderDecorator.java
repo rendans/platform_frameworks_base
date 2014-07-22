@@ -114,9 +114,6 @@ public class CameraBinderDecorator {
                 throw new IllegalArgumentException("Bad argument passed to camera service");
             case DEAD_OBJECT:
                 throw new CameraRuntimeException(CAMERA_DISCONNECTED);
-            case TIMED_OUT:
-                throw new CameraRuntimeException(CAMERA_ERROR,
-                        "Operation timed out in camera service");
             case EACCES:
                 throw new CameraRuntimeException(CAMERA_DISABLED);
             case EBUSY:
@@ -128,7 +125,7 @@ public class CameraBinderDecorator {
             case EOPNOTSUPP:
                 throw new CameraRuntimeException(CAMERA_DEPRECATED_HAL);
             case INVALID_OPERATION:
-                throw new CameraRuntimeException(CAMERA_ERROR,
+                throw new IllegalStateException(
                         "Illegal state encountered in camera service.");
         }
 
