@@ -21,6 +21,7 @@
 #endif
 #include <gui/DisplayEventReceiver.h>
 #include <utils/Log.h>
+#include <pthread.h>
 
 #include "../RenderState.h"
 #include "CanvasContext.h"
@@ -137,6 +138,7 @@ public:
 };
 
 RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
+        , mThreadId(0)
         , mNextWakeup(LLONG_MAX)
         , mDisplayEventReceiver(0)
         , mVsyncRequested(false)
@@ -253,6 +255,7 @@ bool RenderThread::threadLoop() {
 #if defined(HAVE_PTHREADS)
     setpriority(PRIO_PROCESS, 0, PRIORITY_DISPLAY);
 #endif
+    mThreadId = pthread_self();
     initThreadLocals();
 
     int timeoutMillis = -1;
@@ -303,6 +306,16 @@ void RenderThread::queue(RenderTask* task) {
     if (mNextWakeup && task->mRunAt < mNextWakeup) {
         mNextWakeup = 0;
         mLooper->wake();
+    }
+}
+
+void RenderThread::queueAndWait(RenderTask* task, Condition& signal, Mutex& lock) {
+    static nsecs_t sTimeout = milliseconds(500);
+    queue(task);
+    status_t err = signal.waitRelative(lock, sTimeout);
+    if (CC_UNLIKELY(err != NO_ERROR)) {
+        ALOGE("Timeout waiting for RenderTherad! err=%d", err);
+        nukeFromOrbit();
     }
 }
 
@@ -357,6 +370,10 @@ RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {
         *nextWakeup = mNextWakeup;
     }
     return next;
+}
+
+void RenderThread::nukeFromOrbit() {
+    pthread_kill(mThreadId, SIGABRT);
 }
 
 } /* namespace renderthread */

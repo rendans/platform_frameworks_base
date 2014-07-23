@@ -23,6 +23,7 @@
 #include <set>
 
 #include <cutils/compiler.h>
+#include <utils/Condition.h>
 #include <utils/Looper.h>
 #include <utils/Mutex.h>
 #include <utils/Singleton.h>
@@ -74,6 +75,7 @@ public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
     ANDROID_API void queue(RenderTask* task);
+    void queueAndWait(RenderTask* task, Condition& signal, Mutex& lock);
     ANDROID_API void queueAtFront(RenderTask* task);
     void queueAt(RenderTask* task, nsecs_t runAtNs);
     void remove(RenderTask* task);
@@ -107,11 +109,15 @@ private:
     void dispatchFrameCallbacks();
     void requestVsync();
 
+    // VERY DANGEROUS HANDLE WITH EXTREME CARE
+    void nukeFromOrbit();
+
     // Returns the next task to be run. If this returns NULL nextWakeup is set
     // to the time to requery for the nextTask to run. mNextWakeup is also
     // set to this time
     RenderTask* nextTask(nsecs_t* nextWakeup);
 
+    pthread_t mThreadId;
     sp<Looper> mLooper;
     Mutex mLock;
 
