@@ -149,6 +149,7 @@ public class Tethering extends BaseNetworkObserver {
 
     private final INetworkManagementService mNMService;
     private final INetworkStatsService mStatsService;
+    private final ConnectivityManager mConnManager;
     private Looper mLooper;
 
     private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
@@ -200,6 +201,7 @@ public class Tethering extends BaseNetworkObserver {
         mContext = context;
         mNMService = nmService;
         mStatsService = statsService;
+        mConnManager = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mLooper = looper;
 
         mPublicSync = new Object();
@@ -600,7 +602,7 @@ public class Tethering extends BaseNetworkObserver {
     // TODO - move all private methods used only by the state machine into the state machine
     // to clarify what needs synchronized protection.
     private void sendTetherStateChangedBroadcast() {
-        if (!getConnectivityManager().isTetheringSupported()) return;
+        if (!mConnManager.isTetheringSupported()) return;
 
         ArrayList<String> availableList = new ArrayList<String>();
         ArrayList<String> activeList = new ArrayList<String>();
@@ -1507,8 +1509,8 @@ public class Tethering extends BaseNetworkObserver {
                 int result = PhoneConstants.APN_REQUEST_FAILED;
                 String enableString = enableString(apnType);
                 if (enableString == null) return false;
-                result = getConnectivityManager().startUsingNetworkFeature(
-                        ConnectivityManager.TYPE_MOBILE, enableString);
+                result = mConnManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                        enableString);
                 switch (result) {
                 case PhoneConstants.APN_ALREADY_ACTIVE:
                 case PhoneConstants.APN_REQUEST_STARTED:
@@ -1529,8 +1531,8 @@ public class Tethering extends BaseNetworkObserver {
                 // ignore pending renewal requests
                 ++mCurrentConnectionSequence;
                 if (mMobileApnReserved != ConnectivityManager.TYPE_NONE) {
-                    getConnectivityManager().stopUsingNetworkFeature(
-                            ConnectivityManager.TYPE_MOBILE, enableString(mMobileApnReserved));
+                    mConnManager.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                            enableString(mMobileApnReserved));
                     mMobileApnReserved = ConnectivityManager.TYPE_NONE;
                 }
                 return true;
@@ -1773,8 +1775,7 @@ public class Tethering extends BaseNetworkObserver {
                     }
 
                     for (Integer netType : mUpstreamIfaceTypes) {
-                        NetworkInfo info =
-                                getConnectivityManager().getNetworkInfo(netType.intValue());
+                        NetworkInfo info = mConnManager.getNetworkInfo(netType.intValue());
                         if ((info != null) && info.isConnected()) {
                             upType = netType.intValue();
                             break;
@@ -1814,21 +1815,7 @@ public class Tethering extends BaseNetworkObserver {
                         sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                     }
                 } else {
-                    try {
-                        NetworkInfo info =
-                                    getConnectivityManager().getNetworkInfo(upType);
-                        if ((info != null) && info.isConnected() && mNetworkCallback == null ) {
-                            mNetworkCallback = getNetworkCallback();
-                            NetworkRequest networkRequest = getNetworkRequest(upType);
-                            //  Register for Network Callback to receive IPV6 information
-                            if(DBG) Log.d(TAG, "Registering NetworkCallback");
-                            getConnectivityManager().registerNetworkCallback(
-                                                     networkRequest, mNetworkCallback );
-                        }
-                    } catch (Exception e) {
-                            Log.e(TAG, "Exception querying ConnectivityManager", e);
-                    }
-
+                    LinkProperties linkProperties = mConnManager.getLinkProperties(upType);
                     if (linkProperties != null) {
                         // Find the interface with the default IPv4 route. It may be the
                         // interface described by linkProperties, or one of the interfaces
