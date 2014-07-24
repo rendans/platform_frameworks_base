@@ -110,6 +110,10 @@ final class Notifier {
     // True if a user activity message should be sent.
     private boolean mUserActivityPending;
 
+    // The currently active screen on listener. This field is non-null whenever the
+    // ScreenOnBlocker has been acquired and we are awaiting a callback to release it.
+    private ScreenOnUnblocker mPendingScreenOnUnblocker;
+
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
             IAppOpsService appOps, SuspendBlocker suspendBlocker,
             WindowManagerPolicy policy) {
@@ -296,11 +300,17 @@ final class Notifier {
                 if (interactiveChanged) {
                     mActualInteractiveState = INTERACTIVE_STATE_AWAKE;
                     mPendingWakeUpBroadcast = true;
+                    if (mPendingScreenOnUnblocker == null) {
+                        mScreenOnBlocker.acquire();
+                    }
+                    final ScreenOnUnblocker unblocker = new ScreenOnUnblocker();
+                    mPendingScreenOnUnblocker = unblocker;
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             EventLog.writeEvent(EventLogTags.POWER_SCREEN_STATE, 1, 0, 0, 0);
-                            mPolicy.wakingUp();
+                            mPolicy.wakingUp(unblocker);
+                            mActivityManagerInternal.wakingUp();
                         }
                     });
                     updatePendingBroadcastLocked();
@@ -468,6 +478,18 @@ final class Notifier {
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
+        }
+    }
+
+    private final class ScreenOnUnblocker implements WindowManagerPolicy.ScreenOnListener {
+        @Override
+        public void onScreenOn() {
+            synchronized (mLock) {
+                if (mPendingScreenOnUnblocker == this) {
+                    mPendingScreenOnUnblocker = null;
+                    mScreenOnBlocker.release();
+                }
+            }
         }
     }
 
