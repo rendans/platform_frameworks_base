@@ -18,12 +18,9 @@ package android.webkit;
 
 import android.annotation.SystemApi;
 import android.app.ActivityManagerInternal;
-import android.app.AppGlobals;
 import android.app.Application;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
@@ -146,39 +143,11 @@ public final class WebViewFactory {
     }
 
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
-        Application initialApplication = AppGlobals.getInitialApplication();
         try {
-            // First fetch the package info so we can log the webview package version.
-            String packageName = getWebViewPackageName();
-            sPackageInfo = initialApplication.getPackageManager().getPackageInfo(packageName, 0);
-            Log.i(LOGTAG, "Loading " + packageName + " version " + sPackageInfo.versionName +
-                          " (code " + sPackageInfo.versionCode + ")");
-
-            // Construct a package context to load the Java code into the current app.
-            Context webViewContext = initialApplication.createPackageContext(packageName,
-                    Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
-            initialApplication.getAssets().addAssetPath(
-                    webViewContext.getApplicationInfo().sourceDir);
-            ClassLoader clazzLoader = webViewContext.getClassLoader();
-            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
-            try {
-                return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
-                                                                     clazzLoader);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            // If the package doesn't exist, then try loading the null WebView instead.
-            // If that succeeds, then this is a device without WebView support; if it fails then
-            // swallow the failure, complain that the real WebView is missing and rethrow the
-            // original exception.
-            try {
-                return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
-            } catch (ClassNotFoundException e2) {
-                // Ignore.
-            }
-            Log.e(LOGTAG, "Chromium WebView package does not exist", e);
-            throw new AndroidRuntimeException(e);
+            return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY);
+        } catch (ClassNotFoundException e) {
+            Log.e(LOGTAG, "Chromium WebView does not exist");
+            return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
         }
     }
 
