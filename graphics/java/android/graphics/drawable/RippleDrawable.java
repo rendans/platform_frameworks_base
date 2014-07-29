@@ -553,19 +553,32 @@ public class RippleDrawable extends LayerDrawable {
      * background. Nothing will be drawn after this method is called.
      */
     private void clearHotspots() {
+        final int count = mAnimatingRipplesCount;
+        final Ripple[] ripples = mAnimatingRipples;
+        for (int i = 0; i < count; i++) {
+            // Calling cancel may remove the ripple from the animating ripple
+            // array, so cache the reference before nulling it out.
+            final Ripple ripple = ripples[i];
+            ripples[i] = null;
+            ripple.cancel();
+
+            // The active ripple may also be animating. Don't cancel it twice.
+            if (mRipple == ripple) {
+                mRipple = null;
+            }
+        }
+
         if (mRipple != null) {
             mRipple.cancel();
             mRipple = null;
-            mRippleActive = false;
         }
 
         if (mBackground != null) {
             mBackground.cancel();
             mBackground = null;
-            mBackgroundActive = false;
         }
 
-        cancelExitingRipples();
+        mAnimatingRipplesCount = 0;
         invalidateSelf();
     }
 
