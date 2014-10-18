@@ -2043,6 +2043,12 @@ public final class Settings {
         @Deprecated
         public static final String SHOW_PROCESSES = Global.SHOW_PROCESSES;
 
+        /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
+         *
+         * @hide
+         */
+        public static final String STATUS_BAR_QUICK_QS_PULLDOWN = "status_bar_quick_qs_pulldown";
+
         /**
          * If 1, the activity manager will aggressively finish activities and
          * processes as soon as they are no longer needed.  If 0, the normal
@@ -6790,12 +6796,6 @@ public final class Settings {
          * starting user code.  If 0, it will run normally.
          */
         public static final String WAIT_FOR_DEBUGGER = "wait_for_debugger";
-
-        /** Whether to allow one finger quick settings expansion on the right side of the statusbar.
-         *
-         * @hide
-         */
-        public static final String STATUS_BAR_QUICK_QS_PULLDOWN = "status_bar_quick_qs_pulldown";
 
         /**
          * Control whether the process CPU usage meter should be shown.
