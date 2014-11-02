@@ -185,4 +185,7 @@
     <!-- Theme installation error notification -->
     <string name="theme_install_error_title">Failed to install theme</string>
     <string name="theme_install_error_message">%s failed to install</string>
+
+    <!-- USB_PREFERENCES: Notification for when no USB options chosen.  This is the title -->
+    <string name="usb_choose_notification_title">Touch to choose USB options.</string>
 </resources>
