@@ -121,4 +121,7 @@
   <java-symbol type="anim" name="last_app_in" />
   <java-symbol type="anim" name="last_app_out" />
 
+  <!-- Ignored sms packages -->
+  <java-symbol type="array" name="config_ignored_sms_packages" />
+
 </resources>
