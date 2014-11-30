@@ -23,4 +23,7 @@
     <string name="quick_settings_edit_label">Edit Tiles</string>
     <string name="quick_settings_cannot_delete_edit_tile">Cannot delete the Edit tile</string>
     <string name="qs_tiles_reset_confirmation">Reset quick settings tiles to default configuration?</string>
+
+	<!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_connection_hspap">HSPA+</string>
 </resources>
