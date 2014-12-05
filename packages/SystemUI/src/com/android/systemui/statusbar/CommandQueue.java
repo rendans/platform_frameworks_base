@@ -59,6 +59,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_NOTIFICATION_LIGHT_PULSE           = 17 << MSG_SHIFT;
     private static final int MSG_SET_AUTOROTATE_STATUS              = 18 << MSG_SHIFT;
     private static final int MSG_START_CUSTOM_INTENT_AFTER_KEYGUARD = 19 << MSG_SHIFT;
+    private static final int MSG_ANIMATE_PANEL_FROM_NAVBAR = 20 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -85,6 +86,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
         public void animateExpandSettingsPanel();
+        public void animateNotificationsOrSettingsPanel();
         public void setSystemUiVisibility(int vis, int mask);
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
@@ -100,6 +102,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void buzzBeepBlinked();
         public void notificationLightOff();
         public void notificationLightPulse(int argb, int onMillis, int offMillis);
+        public void notifyLayoutChange(int direction);
         public void setAutoRotate(boolean enabled);
         public void showCustomIntentAfterKeyguard(Intent intent);
     }
@@ -150,6 +153,13 @@ public class CommandQueue extends IStatusBar.Stub {
         synchronized (mList) {
             mHandler.removeMessages(MSG_EXPAND_SETTINGS);
             mHandler.sendEmptyMessage(MSG_EXPAND_SETTINGS);
+        }
+    }
+
+    public void animateNotificationsOrSettingsPanel() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_ANIMATE_PANEL_FROM_NAVBAR);
+            mHandler.sendEmptyMessage(MSG_ANIMATE_PANEL_FROM_NAVBAR);
         }
     }
 
@@ -243,6 +253,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void notifyLayoutChange(int direction) {
+        mCallbacks.notifyLayoutChange(direction);
+    }
+
     public void setAutoRotate(boolean enabled) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_SET_AUTOROTATE_STATUS);
@@ -299,6 +313,9 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_EXPAND_SETTINGS:
                     mCallbacks.animateExpandSettingsPanel();
                     break;
+                case MSG_ANIMATE_PANEL_FROM_NAVBAR:
+                    mCallbacks.animateNotificationsOrSettingsPanel();
+                    break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
                     mCallbacks.setSystemUiVisibility(msg.arg1, msg.arg2);
                     break;
@@ -346,4 +363,3 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 }
-
