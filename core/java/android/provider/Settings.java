@@ -3243,6 +3243,9 @@ public final class Settings {
             PHONE_BLACKLIST_REGEX_ENABLED,
 			STATUS_BAR_BATTERY_STYLE,
             STATUS_BAR_SHOW_BATTERY_PERCENT,
+			INCREASING_RING,
+            INCREASING_RING_START_VOLUME,
+            INCREASING_RING_RAMP_UP_TIME
         };
 
         /**
