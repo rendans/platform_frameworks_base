@@ -17,6 +17,7 @@
 package android.view;
 
 import android.app.AppGlobals;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -216,7 +217,7 @@ public class ViewConfiguration {
     /**
      * Max distance in dips to overscroll for edge effects
      */
-     private static int OVERSCROLL_DISTANCE = = 0;
+     private static int OVERSCROLL_DISTANCE = 0;
 
     /**
      * Default Max distance in dips to overscroll for edge effects
@@ -259,6 +260,8 @@ public class ViewConfiguration {
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
+
+    private Context mContext;
 
     static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
@@ -341,6 +344,8 @@ public class ViewConfiguration {
         } else {
             sizeAndDensity = density;
         }
+
+        mContext = context;
 
         mEdgeSlop = (int) (sizeAndDensity * EDGE_SLOP + 0.5f);
         mFadingEdgeLength = (int) (sizeAndDensity * FADING_EDGE_LENGTH + 0.5f);
