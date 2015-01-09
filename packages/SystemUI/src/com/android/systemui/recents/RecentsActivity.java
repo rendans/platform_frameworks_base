@@ -285,7 +285,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         if (launchIntent.getAction().equals(AlternateRecentsComponent.ACTION_CLEAR_RECENTS_ACTIVITY)) {
             if (mVisible && mRecentsView != null) {
-                mRecentsView.dismissAllTasksAnimated();
+                mRecentsView.clearRecents();
             }
         }
     }
