@@ -4463,7 +4463,7 @@ public class AudioService extends IAudioService.Stub {
                     Settings.Global.DOCK_AUDIO_MEDIA_ENABLED))) {
                     readDockAudioSettings(mContentResolver);
 
-                    mLinkNotificationWithVolume = Settings.System.getInt(mContentResolver,
+                mLinkNotificationWithVolume = Settings.System.getInt(mContentResolver,
                         Settings.Secure.VOLUME_LINK_NOTIFICATION, 1) == 1;
                 if (mLinkNotificationWithVolume) {
                     mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
@@ -4473,7 +4473,7 @@ public class AudioService extends IAudioService.Stub {
             }
         }
     }
-
+}
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceAvailable(String address) {
         // enable A2DP before notifying A2DP connection to avoid unecessary processing in
