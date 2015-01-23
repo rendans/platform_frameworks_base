@@ -500,7 +500,7 @@ public class ThemeService extends IThemeService.Stub {
 
     private boolean updateFonts(String pkgName) {
         //Clear the font dir
-        FileUtils.deleteContents(new File(ThemeUtils.SYSTEM_THEME_FONT_PATH));
+        ThemeUtils.deleteFilesInDir(ThemeUtils.SYSTEM_THEME_FONT_PATH);
 
         if (!pkgName.equals(SYSTEM_DEFAULT)) {
             //Get Font Assets

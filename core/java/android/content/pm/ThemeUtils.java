@@ -15,6 +15,7 @@
  */
 package android.content.pm;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -26,6 +27,7 @@ import android.content.res.Configuration;
 import android.content.res.ThemeConfig;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.FileUtils;
@@ -71,7 +73,8 @@ public class ThemeUtils {
     public static final String ICONS_PATH = "assets/icons/";
     public static final String COMMON_RES_PATH = "assets/overlays/common/";
     public static final String FONT_XML = "fonts.xml";
-    public static final String RESOURCE_CACHE_DIR = "/data/resource-cache/";
+    public static final String RESTABLE_EXTENSION = ".arsc";
+    public static final String IDMAP_PREFIX = "/data/resource-cache/";
     public static final String IDMAP_SUFFIX = "@idmap";
     public static final String COMMON_RES_SUFFIX = ".common";
     public static final String COMMON_RES_TARGET = "common";
@@ -125,40 +128,47 @@ public class ThemeUtils {
     };
 
 
-    /**
-     * Get the root path of the resource cache for the given theme
-     * @param themePkgName
-     * @return Root resource cache path for the given theme
+    /*
+     * Retrieve the path to a resource table (ie resource.arsc)
+     * Themes have a resources.arsc for every overlay package targeted. These are compiled
+     * at install time and stored in the data partition.
+     *
      */
-    public static String getOverlayResourceCacheDir(String themePkgName) {
-        return RESOURCE_CACHE_DIR + themePkgName;
+    public static String getResTablePath(String targetPkgName, PackageInfo overlayPkg) {
+        return getResTablePath(targetPkgName, overlayPkg.applicationInfo.publicSourceDir);
     }
 
-    /**
-     * Get the path of the resource cache for the given target and theme
-     * @param targetPkgName
-     * @param themePkg
-     * @return Path to the resource cache for this target and theme
+    public static String getResTablePath(String targetPkgName, PackageParser.Package overlayPkg) {
+        return getResTablePath(targetPkgName, overlayPkg.applicationInfo.publicSourceDir);
+    }
+
+    public static String getResTablePath(String targetPkgName, String overlayApkPath) {
+        String restablePath = getResDir(targetPkgName, overlayApkPath) + "/resources.arsc";
+        return restablePath;
+    }
+
+    /*
+     * Retrieve the path to the directory where resource table (ie resource.arsc) resides
+     * Themes have a resources.arsc for every overlay package targeted. These are compiled
+     * at install time and stored in the data partition.
+     *
      */
-    public static String getTargetCacheDir(String targetPkgName, PackageInfo themePkg) {
-        return getTargetCacheDir(targetPkgName, themePkg.packageName);
+    public static String getResDir(String targetPkgName, PackageInfo overlayPkg) {
+        return getResDir(targetPkgName, overlayPkg.applicationInfo.publicSourceDir);
     }
 
-    public static String getTargetCacheDir(String targetPkgName, PackageParser.Package themePkg) {
-        return getTargetCacheDir(targetPkgName, themePkg.packageName);
+    public static String getResDir(String targetPkgName, PackageParser.Package overlayPkg) {
+        return getResDir(targetPkgName, overlayPkg.applicationInfo.publicSourceDir);
     }
 
-    public static String getTargetCacheDir(String targetPkgName, String themePkgName) {
-        return getOverlayResourceCacheDir(themePkgName) + File.separator + targetPkgName;
+    public static String getResDir(String targetPkgName, String overlayApkPath) {
+        String restableName = overlayApkPath.replaceAll("/", "@") + "@" + targetPkgName;
+        if (restableName.startsWith("@")) restableName = restableName.substring(1);
+        return IDMAP_PREFIX + restableName;
     }
 
-    /**
-     * Get the path to the icons for the given theme
-     * @param pkgName
-     * @return
-     */
     public static String getIconPackDir(String pkgName) {
-      return getOverlayResourceCacheDir(pkgName) + File.separator + "icons";
+      return IDMAP_PREFIX + pkgName;
     }
 
     public static String getIconHashFile(String pkgName) {
@@ -171,10 +181,6 @@ public class ThemeUtils {
 
     public static String getIconPackResPath(String pkgName) {
         return getIconPackDir(pkgName) + "/resources.arsc";
-    }
-
-    public static String getIdmapPath(String targetPkgName, String overlayPkgName) {
-        return getTargetCacheDir(targetPkgName, overlayPkgName) + File.separator + "idmap";
     }
 
     public static String getOverlayPathToTarget(String targetPkgName) {
@@ -192,7 +198,7 @@ public class ThemeUtils {
     }
 
     public static void createCacheDirIfNotExists() throws IOException {
-        File file = new File(RESOURCE_CACHE_DIR);
+        File file = new File(IDMAP_PREFIX);
         if (!file.exists() && !file.mkdir()) {
             throw new IOException("Could not create dir: " + file.toString());
         }
@@ -200,10 +206,9 @@ public class ThemeUtils {
                 | FileUtils.S_IRWXG | FileUtils.S_IROTH | FileUtils.S_IXOTH, -1, -1);
     }
 
-    public static void createResourcesDirIfNotExists(String targetPkgName, String overlayPkgName)
+    public static void createResourcesDirIfNotExists(String targetPkgName, String overlayApkPath)
             throws IOException {
-        createDirIfNotExists(getOverlayResourceCacheDir(overlayPkgName));
-        File file = new File(getTargetCacheDir(targetPkgName, overlayPkgName));
+        File file = new File(getResDir(targetPkgName, overlayApkPath));
         if (!file.exists() && !file.mkdir()) {
             throw new IOException("Could not create dir: " + file.toString());
         }
@@ -212,7 +217,6 @@ public class ThemeUtils {
     }
 
     public static void createIconDirIfNotExists(String pkgName) throws IOException {
-        createDirIfNotExists(getOverlayResourceCacheDir(pkgName));
         File file = new File(getIconPackDir(pkgName));
         if (!file.exists() && !file.mkdir()) {
             throw new IOException("Could not create dir: " + file.toString());
@@ -279,7 +283,18 @@ public class ThemeUtils {
     }
 
     public static void clearIconCache() {
-        FileUtils.deleteContents(new File(SYSTEM_THEME_ICON_CACHE_DIR));
+        deleteFilesInDir(SYSTEM_THEME_ICON_CACHE_DIR);
+    }
+
+    //Note: will not delete populated subdirs
+    public static void deleteFilesInDir(String dirPath) {
+        File fontDir = new File(dirPath);
+        File[] files = fontDir.listFiles();
+        if (files != null) {
+            for(File file : fontDir.listFiles()) {
+                file.delete();
+            }
+        }
     }
 
     public static InputStream getInputStreamFromAsset(Context ctx, String path) throws IOException {
