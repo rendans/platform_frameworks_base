@@ -281,6 +281,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
         });
     }
 
+    private boolean showActivityIcons() {
+        boolean shouldShowActivityIcons = Settings.System.getInt(mContext
+            .getContentResolver(), Settings.System.STATUS_BAR_SHOW_DATA_ACTIVITY, 0) == 1;
+        updateDataIcon();
+        updateWifiIcons();
+        return shouldShowActivityIcons;
+    }
+
     private void notifyMobileDataEnabled(boolean enabled) {
         for (NetworkSignalChangedCallback cb : mSignalsChangedCallbacks) {
             cb.onMobileDataEnabled(enabled);
@@ -1320,6 +1328,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 if (DEBUG) {
                     wifiLabel += "xxxxXXXXxxxxXXXX";
                 }
+                if (showActivityIcons()) {
                 switch (mWifiActivity) {
                 case WifiManager.DATA_ACTIVITY_IN:
                     mWifiActivityIconId = R.drawable.stat_sys_signal_in;
@@ -1335,6 +1344,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     break;
                 }
             }
+        }
 
             combinedActivityIconId = mWifiActivityIconId;
             combinedLabel = wifiLabel;
