@@ -19,4 +19,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Navigation bar -->
     <string name="def_navbar_layout_warning">Empty layout: using default!</string>
+
+    <!-- Quick settings -->
+    <string name="quick_settings_screenshot">Screenshot</string>
 </resources>
