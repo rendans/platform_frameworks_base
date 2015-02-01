@@ -178,6 +178,9 @@
     <!-- USB_PREFERENCES: Notification for when no USB options chosen.  This is the title -->
     <string name="usb_choose_notification_title">Touch to choose USB options.</string>
 
+    <!-- stylus gestures support -->
+    <string name="stylus_app_not_installed">%s is not installed</string>
+
     <string name="permlab_interceptSmsSent">intercept outgoing SMS</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_interceptSmsSent">Allows the app to
