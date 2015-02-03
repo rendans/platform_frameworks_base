@@ -303,13 +303,11 @@ public class KeyButtonView extends ImageView {
 
     protected void doSinglePress() {
         if (callOnClick()) {
-            removeCallbacks(mSingleTap);
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
         }
 
         if (mActions != null) {
             if (mActions.singleAction != null) {
-            	removeCallbacks(mSingleTap);
                 VanirActions.launchAction(mContext, mActions.singleAction);
             }
         }
