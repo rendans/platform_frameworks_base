@@ -88,6 +88,7 @@ public class KeyButtonView extends ImageView {
     private float mDrawingAlpha = 1f;
     private float mQuiescentAlpha = DEFAULT_QUIESCENT_ALPHA;
     private Animator mAnimateToQuiescent = new ObjectAnimator();
+    private KeyButtonRipple mRipple;
     private boolean mShouldClick = true;
 
     private static PowerManager mPm;
@@ -268,6 +269,9 @@ public class KeyButtonView extends ImageView {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 setPressed(false);
+                // hack to fix ripple getting stuck. exitHardware() starts an animation,
+                // but sometimes does not finish it.
+                mRipple.exitSoftware();
 				if (mIsDPadAction) {
                     mShouldClick = true;
                     removeCallbacks(mDPadKeyRepeater);
