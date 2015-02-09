@@ -45,6 +45,7 @@ import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.LockscreenToggleTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.qs.tiles.ScreenOffTile;
 import com.android.systemui.qs.tiles.ScreenTimeoutTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.statusbar.policy.BluetoothController;
@@ -293,6 +294,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 		else if (tileSpec.equals("adb_network")) return new AdbOverNetworkTile(this);
 		else if (tileSpec.equals("screen_timeout")) return new ScreenTimeoutTile(this);
 		else if (tileSpec.equals("lockscreen")) return  new LockscreenToggleTile(this);
+		else if (tileSpec.equals("screen_off")) return  new ScreenOffTile(this);
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
     }
@@ -364,6 +366,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 		else if (spec.equals("adb_network")) return R.string.quick_settings_network_adb_label;
 		else if (spec.equals("screen_timeout")) return R.string.quick_settings_screen_timeout_detail_title;
 		else if (spec.equals("lockscreen")) return R.string.quick_settings_lockscreen_label;
+		else if (spec.equals("screen_off")) return R.string.quick_settings_screen_off;
         return 0;
     }
 }
