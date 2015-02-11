@@ -160,6 +160,7 @@ public class StatusBarKeyguardViewManager {
         mScreenOn = true;
         mStatusBarWindowManager.onScreenTurnedOn();
         mPhoneStatusBar.onScreenTurnedOn();
+        mStatusBarWindowManager.onKeyguardChanged();
         if (callback != null) {
             callbackAfterDraw(callback);
         }
