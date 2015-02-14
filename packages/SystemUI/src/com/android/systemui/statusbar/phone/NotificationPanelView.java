@@ -44,6 +44,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.util.cm.LockscreenShortcutsHelper;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
@@ -175,6 +176,9 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsTouchAboveFalsingThreshold;
     private int mQsFalsingThreshold;
 
+    private LockPatternUtils mLockPatternUtils;
+
+
     private Handler mHandler = new Handler();
     private SettingsObserver mSettingsObserver;
 
@@ -185,6 +189,7 @@ public class NotificationPanelView extends PanelView implements
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mLockPatternUtils = new LockPatternUtils(mContext);
         mSettingsObserver = new SettingsObserver(mHandler);
         mDoubleTapGesture = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
             @Override
