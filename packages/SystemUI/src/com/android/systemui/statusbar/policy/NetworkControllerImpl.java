@@ -1343,8 +1343,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mWifiActivityIconId = R.drawable.stat_sys_signal_none;
                     break;
                 }
+                } else {
+                    mWifiActivityIconId = 0;
+                }
             }
-        }
 
             combinedActivityIconId = mWifiActivityIconId;
             combinedLabel = wifiLabel;
