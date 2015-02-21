@@ -44,6 +44,7 @@ import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.LockscreenToggleTile;
+import com.android.systemui.qs.tiles.RebootTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.ScreenOffTile;
 import com.android.systemui.qs.tiles.ScreenTimeoutTile;
@@ -295,6 +296,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 		else if (tileSpec.equals("screen_timeout")) return new ScreenTimeoutTile(this);
 		else if (tileSpec.equals("lockscreen")) return  new LockscreenToggleTile(this);
 		else if (tileSpec.equals("screen_off")) return  new ScreenOffTile(this);
+		else if (tileSpec.equals("reboot")) return  new RebootTile(this);
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
     }
@@ -367,6 +369,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 		else if (spec.equals("screen_timeout")) return R.string.quick_settings_screen_timeout_detail_title;
 		else if (spec.equals("lockscreen")) return R.string.quick_settings_lockscreen_label;
 		else if (spec.equals("screen_off")) return R.string.quick_settings_screen_off;
+		else if (spec.equals("reboot")) return R.string.quick_settings_reboot_label;
         return 0;
     }
 }
