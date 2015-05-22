@@ -1,5 +1,6 @@
 <!--
 Copyright (C) 2014 The Android Open Source Project
+Copyright (C) 2015 Team Horizon
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -18,5 +19,5 @@ Copyright (C) 2014 The Android Open Source Project
        android:width="38dp"
        android:viewportWidth="24"
        android:viewportHeight="24">
-    <path android:fillColor="#F8F8F8" android:pathData="M16,18.14H18V6.14H16M6,18.14L14.5,12.14L6,6.14V18.14Z" />
+    <path android:fillColor="#F8F8F8" android:pathData="M7,9V15H11L16,20V4L11,9H7Z" />
 </vector>

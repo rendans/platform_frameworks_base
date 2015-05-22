@@ -224,6 +224,12 @@
     <string name="accessibility_next">Next</string>
     <!-- Content description of the power button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_previous">Previous</string>
+    <!-- Content description of the power button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_mute_button">Volume mute</string>
+    <!-- Content description of the power button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_vol_up">Volume up</string>
+    <!-- Content description of the power button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_vol_down">Volume down</string>
 
     <!-- Content description of the compatibility zoom button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_compatibility_zoom_button">Compatibility zoom button.</string>

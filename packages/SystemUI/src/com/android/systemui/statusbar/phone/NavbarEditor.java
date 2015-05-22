@@ -157,11 +157,24 @@ public class NavbarEditor implements View.OnTouchListener {
             R.string.navbar_previous_button, R.string.accessibility_previous,
             KeyEvent.KEYCODE_MEDIA_PREVIOUS, R.drawable.ic_sysbar_previous,
             R.drawable.ic_sysbar_previous, R.drawable.ic_sysbar_previous);
+    public static final ButtonInfo NAVBAR_MUTE = new ButtonInfo("mute",
+            R.string.navbar_mute, R.string.accessibility_mute_button,
+            KeyEvent.KEYCODE_VOLUME_MUTE, R.drawable.ic_sysbar_mute,
+            R.drawable.ic_sysbar_mute, R.drawable.ic_sysbar_mute);
+    public static final ButtonInfo NAVBAR_VOL_UP = new ButtonInfo("volume_up",
+            R.string.navbar_vol_up, R.string.accessibility_vol_up,
+            KeyEvent.KEYCODE_VOLUME_UP, R.drawable.ic_sysbar_vol_up,
+            R.drawable.ic_sysbar_vol_up, R.drawable.ic_sysbar_vol_up);
+    public static final ButtonInfo NAVBAR_VOL_DOWN = new ButtonInfo("volume_down",
+            R.string.navbar_vol_down, R.string.accessibility_vol_down,
+            KeyEvent.KEYCODE_VOLUME_DOWN, R.drawable.ic_sysbar_vol_down,
+            R.drawable.ic_sysbar_vol_down, R.drawable.ic_sysbar_vol_down);
 
     private static final ButtonInfo[] ALL_BUTTONS = new ButtonInfo[] {
         NAVBAR_EMPTY, NAVBAR_HOME, NAVBAR_BACK, NAVBAR_SEARCH,
         NAVBAR_RECENT, NAVBAR_CONDITIONAL_MENU, NAVBAR_ALWAYS_MENU, NAVBAR_MENU_BIG, NAVBAR_POWER,
-        NAVBAR_MEDIA_PLAY_PAUSE, NAVBAR_MEDIA_NEXT, NAVBAR_MEDIA_PREVIOUS
+        NAVBAR_MEDIA_PLAY_PAUSE, NAVBAR_MEDIA_NEXT, NAVBAR_MEDIA_PREVIOUS, NAVBAR_MUTE, NAVBAR_VOL_UP,
+        NAVBAR_VOL_DOWN
     };
 
     private static final String DEFAULT_SETTING_STRING = "empty|back|home|recent|empty|menu0";

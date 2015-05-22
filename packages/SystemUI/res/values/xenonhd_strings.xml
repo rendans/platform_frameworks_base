@@ -30,13 +30,20 @@
     <string name="quick_settings_reboot_label">Reboot</string>
     <string name="quick_settings_reboot_recovery_label">Recovery</string>
 
-    <!-- Power Button for Navbar -->
+    <!-- Power Button for navbar -->
     <string name="navbar_power_button">Power button</string>
 
-    <!-- Media Buttons for Navbar -->
+    <!-- Media Buttons for navbar -->
     <string name="navbar_playpause_button">Media play/pause button</string>
     <string name="navbar_next_button">Next track button</string>
     <string name="navbar_previous_button">Previous track button</string>
+
+    <!-- Volume mute button for navbar -->
+    <string name="navbar_mute">Volume mute button</string>
+
+    <!-- Volume up/down buttons for navbar -->
+    <string name="navbar_vol_up">Volume up</string>
+    <string name="navbar_vol_down">Volume down</string>
 
     <!-- Screenrecord Notification Ticker -->
     <string name="screenrecord_notif_ticker">Screen is being recorded</string>
