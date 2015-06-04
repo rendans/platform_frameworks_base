@@ -721,25 +721,6 @@ public class AudioManager {
         }
     }
 
-    private Context getContext() {
-        if (mApplicationContext == null) {
-            setContext(mOriginalContext);
-        }
-        if (mApplicationContext != null) {
-            return mApplicationContext;
-        }
-        return mOriginalContext;
-    }
-
-    private void setContext(Context context) {
-        mApplicationContext = context.getApplicationContext();
-        if (mApplicationContext != null) {
-            mOriginalContext = null;
-        } else {
-            mOriginalContext = context;
-        }
-    }
-
     private static IAudioService getService()
     {
         if (sService != null) {
