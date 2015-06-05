@@ -90,9 +90,6 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_MEDIA_PLAY_PAUSE, alpha, animate);
         setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_MEDIA_NEXT, alpha, animate);
         setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_MEDIA_PREVIOUS, alpha, animate);
-        setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_MUTE, alpha, animate);
-        setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_VOL_UP, alpha, animate);
-        setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_VOL_DOWN, alpha, animate);
 
         applyBackButtonQuiescentAlpha(mode, animate);
 
@@ -117,9 +114,6 @@ public final class NavigationBarTransitions extends BarTransitions {
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, NavbarEditor.NAVBAR_MEDIA_PLAY_PAUSE);
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, NavbarEditor.NAVBAR_MEDIA_NEXT);
         backAlpha = maxVisibleQuiescentAlpha(backAlpha, NavbarEditor.NAVBAR_MEDIA_PREVIOUS);
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, NavbarEditor.NAVBAR_MUTE);
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, NavbarEditor.NAVBAR_VOL_UP);
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, NavbarEditor.NAVBAR_VOL_DOWN);
 
         if (backAlpha > 0) {
             setKeyButtonViewQuiescentAlpha(NavbarEditor.NAVBAR_BACK, backAlpha, animate);
