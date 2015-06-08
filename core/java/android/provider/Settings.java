@@ -6256,12 +6256,6 @@ public final class Settings {
         public static final String QS_USE_FOUR_COLUMNS = "qs_use_four_columns";
 
         /**
-         * Whether search panel is enabled.
-         * @hide
-         */
-        public static final String SEARCH_PANEL_ENABLED = "search_panel_enabled";
-
-        /**
          * String to contain power menu actions
          * @hide
          */
