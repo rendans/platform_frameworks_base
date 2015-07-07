@@ -1023,7 +1023,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mExpandedContents = mStackScroller;
 
         mBackdrop = (BackDropView) mStatusBarWindow.findViewById(R.id.backdrop);
-        mBackdrop.setService(this);
+        mBackdrop.setService(this, mStackScroller);
         mBackdropFront = (ImageView) mBackdrop.findViewById(R.id.backdrop_front);
         mBackdropBack = (ImageView) mBackdrop.findViewById(R.id.backdrop_back);
 
@@ -2254,6 +2254,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 backdropBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
                 // might still be null
             }
+            mBackdrop.updateVisualizerColor(backdropBitmap);
         }
 
         // apply user lockscreen image
@@ -5014,8 +5015,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
-    public void requestVisualizer(boolean show, int delay) {
+    public void requestVisualizer(Boolean show, int delay) {
         mBackdrop.requestVisualizer(show, delay);
+    }
+
+    public void setVisualizerTouching(boolean touching) {
+        mBackdrop.setTouching(touching);
     }
 
     public void wakeUpIfDozing(long time, MotionEvent event) {
