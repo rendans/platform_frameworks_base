@@ -1257,6 +1257,7 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_COUNT);
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_DELAY_MS);
             MOVED_TO_SECURE.add(Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS);
+			MOVED_TO_SECURE.add(Secure.STATS_COLLECTION);
 
             // At one time in System, then Global, but now back in Secure
             MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
@@ -3326,6 +3327,37 @@ public final class Settings {
          * @hide
          */
         public static final String LOCK_SCREEN_WEATHER_ICON_COLOR = "lock_screen_weather_icon_color";
+
+		/**
+         * Whether to hide the weather panel when the notifications will reach the number of notifications
+         * @hide
+         */
+        public static final String LOCK_SCREEN_WEATHER_HIDE_PANEL = "lock_screen_weather_hide_panel";
+
+        /**
+         * Hide the weather panel when the visible lockscreen notifications will reach this number
+         * 1: 1 notification (always)
+         * 2: 2 notifications
+         * 3: 3 notifications
+         * 4: 4 notifications
+         * 5: 5 notifications
+         * 6: 6 notifications
+         * default: 6
+         * @hide
+         */
+        public static final String LOCK_SCREEN_WEATHER_NUMBER_OF_NOTIFICATIONS = "lock_screen_weather_number_of_notifications";
+
+        /**
+         * Number of notifications visible on the lockscreen including the overflow container
+         * @hide
+         */
+        public static final String LOCK_SCREEN_VISIBLE_NOTIFICATIONS = "lock_screen_visible_notifications";
+
+        /**
+         * Number of maximum allowed notifications on the lock screen
+         * @hide
+         */
+        public static final String LOCK_SCREEN_MAX_NOTIFICATIONS = "lock_screen_max_notifications";
 
         /**
          * Whether lock-to-app will be triggered by long-press on recents.
@@ -6345,6 +6377,12 @@ public final class Settings {
          * @hide
          */
         public static final String DEVELOPMENT_SHORTCUT = "development_shortcut";
+
+		/**
+         * Global stats collection
+         * @hide
+         */
+        public static final String STATS_COLLECTION = "stats_collection";
 
         /**
          * Boolean value whether to link ringtone and notification volume
