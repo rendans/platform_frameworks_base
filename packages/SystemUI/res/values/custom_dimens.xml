@@ -24,4 +24,7 @@
 
     <dimen name="status_bar_expanded_header_elevation">4dp</dimen>
 
+	<!-- The font size for the temperature text -->
+    <dimen name="status_bar_temp_text_size">14sp</dimen>
+
 </resources> 
