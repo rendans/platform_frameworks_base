@@ -3688,6 +3688,12 @@ public final class Settings {
          */
         public static final String STATUS_BAR_WEATHER_TEMP_STYLE = "status_bar_weather_temp_style";
 
+		/**
+         * Statusbar weather color setting
+         * @hide
+         */
+        public static final String STATUS_BAR_WEATHER_COLOR = "status_bar_weather_color";
+
         /**
          * Visibility of SIM icons of unpopulated SIM slots in MSIM mode
          * 0: Hide unpopulated SIM icons
