@@ -91,7 +91,8 @@
                    android:singleLine="true"
                    android:gravity="right|center_vertical"
                    android:textAppearance="@style/TextAppearance.StatusBar.WeatherTemp"
-                   android:paddingStart="2dp"
+                   android:visibility="gone"
+                   android:paddingStart="4dp"
                    android:paddingEnd="4dp" />
 
                <com.android.systemui.statusbar.widget.CarrierLabel
@@ -130,6 +131,7 @@
                 android:layout_height="match_parent"
                 android:singleLine="false"
                 android:gravity="right|center_vertical"
+                android:visibility="gone"
                 android:paddingEnd="2dp" />
 
             <TextView
@@ -139,6 +141,7 @@
                 android:singleLine="true"
                 android:gravity="right|center_vertical"
                 android:textAppearance="@style/TextAppearance.StatusBar.WeatherTemp"
+                android:visibility="gone"
                 android:paddingStart="2dp"
                 android:paddingEnd="4dp" />
 
@@ -160,6 +163,7 @@
                 android:singleLine="true"
                 android:paddingStart="7dp"
                 android:gravity="center_vertical|start"
+                android:visibility="gone"
                 />
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
