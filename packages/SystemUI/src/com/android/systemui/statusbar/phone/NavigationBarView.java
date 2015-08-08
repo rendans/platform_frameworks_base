@@ -940,20 +940,18 @@ public class NavigationBarView extends LinearLayout {
         setMenuVisibility(mShowMenu, true);
     }
 
-    private class SettingsObserver extends UserContentObserver {
+    private class SettingsObserver extends ContentObserver {
 
         SettingsObserver(Handler handler) {
             super(handler);
         }
 
-        @Override
-        protected void observe() {
-            super.observe();
+        void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.NAVIGATION_BAR_MENU_ARROW_KEYS),
-                    false, this, UserHandle.USER_ALL);
-			resolver.registerContentObserver(Settings.System.getUriFor(
+                    false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DIM_NAV_BUTTONS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DIM_NAV_BUTTONS_TIMEOUT), false, this);
@@ -972,13 +970,11 @@ public class NavigationBarView extends LinearLayout {
             onChange(false);
         }
 
-        @Override
-        protected void unobserve() {
-            super.unobserve();
+        void unobserve() {
             mContext.getContentResolver().unregisterContentObserver(this);
         }
 
-		@Override
+        @Override
         public void onChange(boolean selfChange) {
             ContentResolver resolver = mContext.getContentResolver();
             mShowDpadArrowKeys = Settings.System.getInt(resolver,
@@ -1004,12 +1000,6 @@ public class NavigationBarView extends LinearLayout {
             mDoubleTapToSleep = (Settings.System.getIntForUser(resolver,
                     Settings.System.DOUBLE_TAP_SLEEP_NAVBAR, 0,
                     UserHandle.USER_CURRENT) == 1);
-            // reset saved side button visibilities
-            for (int i = 0; i < mSideButtonVisibilities.length; i++) {
-                for (int j = 0; j < mSideButtonVisibilities[i].length; j++) {
-                    mSideButtonVisibilities[i][j] = -1;
-                }
-            }
             setNavigationIconHints(mNavigationIconHints, true);
 
             onNavButtonTouched();
