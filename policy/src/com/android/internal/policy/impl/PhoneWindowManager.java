@@ -1802,6 +1802,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             haveEnableGesture = true;
             mWindowManagerFuncs.registerPointerEventListener(mOPGestures);
         } else {
+            if (!haveEnableGesture) return;
             haveEnableGesture = false;
             mWindowManagerFuncs.unregisterPointerEventListener(mOPGestures);
         }
