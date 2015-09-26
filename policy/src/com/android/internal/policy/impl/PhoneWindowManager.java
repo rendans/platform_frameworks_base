@@ -6907,6 +6907,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                                             "</font></b>"));
                 }
                 else {
+		    mBootMsgDialog.setIcon(0);
                     mBootMsgDialog.setMessage(msg);
                 }
             }
