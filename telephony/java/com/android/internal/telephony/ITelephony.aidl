@@ -714,9 +714,13 @@ interface ITelephony {
      *
      * @param subId the id of the subscription.
      * @param operatorInfo the operator to attach to.
+     * @param persistSelection should the selection persist till reboot or its
+     *        turned off? Will also result in notification being not shown to
+     *        the user if the signal is lost.
      * @return true if the request suceeded.
      */
-    boolean setNetworkSelectionModeManual(int subId, in OperatorInfo operator);
+    boolean setNetworkSelectionModeManual(int subId, in OperatorInfo operator,
+            boolean persistSelection);
 
     /**
      * Set the preferred network type.
@@ -958,6 +962,7 @@ interface ITelephony {
      * @return {@code true} if the device supports hearing aid compatibility.
      */
     boolean isHearingAidCompatibilitySupported();
+
     /**
      * Get IMS Registration Status
      */
@@ -965,15 +970,18 @@ interface ITelephony {
 
     /**
      * Returns the Status of Wi-Fi Calling
-     *@hide
      */
-    boolean isWifiCallingEnabled();
+    boolean isWifiCallingAvailable();
+    
+    /**
+     * Returns the Status of Volte
+     */
+    boolean isVolteAvailable();
 
      /**
-     * Returns the Status of Volte
-     *@hide
+     * Returns the Status of VT (video telephony)
      */
-    boolean isVolteEnabled();
+    boolean isVideoTelephonyAvailable();
 
     /**
       * Returns the unique device ID of phone, for example, the IMEI for
@@ -1002,7 +1010,6 @@ interface ITelephony {
 
     /**
      * Return the modem activity info.
-     *@hide
      */
     ModemActivityInfo getModemActivityInfo();
 }
