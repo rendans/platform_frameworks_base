@@ -958,7 +958,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
 
         // Set up the quick settings tile panel
-        mQSPanel = (QSDragPanel) mStatusBarWindowContent.findViewById(R.id.quick_settings_panel);
+        mQSPanel = (QSDragPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
         if (mQSPanel != null) {
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
