@@ -129,6 +129,7 @@ public class PhoneStatusBarPolicy implements Callback {
         mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = userInfoController;
+		mSettingsObserver.onChange(true);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
@@ -157,10 +158,9 @@ public class PhoneStatusBarPolicy implements Callback {
         // Alarm clock
         mService.setIcon(SLOT_ALARM_CLOCK, R.drawable.stat_sys_alarm, 0, null);
         mService.setIconVisibility(SLOT_ALARM_CLOCK, false);
-        mAlarmIconObserver.onChange(true);
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SHOW_ALARM_ICON),
-                false, mAlarmIconObserver);
+                false, mSettingsObserver);
 
 		// Headset icon
 		mContext.getContentResolver().registerContentObserver(
@@ -197,7 +197,7 @@ public class PhoneStatusBarPolicy implements Callback {
         mService.setIconVisibility(SLOT_MANAGED_PROFILE, false);
     }
 
-    private ContentObserver mAlarmIconObserver = new ContentObserver(null) {
+    private ContentObserver mSettingsObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             mAlarmIconVisible = Settings.System.getInt(mContext.getContentResolver(),
