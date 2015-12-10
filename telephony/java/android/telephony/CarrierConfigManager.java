@@ -77,7 +77,7 @@ public class CarrierConfigManager {
     /** Flag indicating if the phone is a world phone */
     public static final String KEY_WORLD_PHONE_BOOL = "world_phone_bool";
 
-	/**
+    /**
      * Flag to require or skip entitlement checks.
      * If true, entitlement checks will be executed if device has been configured for it,
      * If false, entitlement checks will be skipped.
@@ -191,7 +191,7 @@ public class CarrierConfigManager {
     public static final String
             KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL = "disable_cdma_activation_code_bool";
 
-   /**
+    /**
      * Override the platform's notion of a network operator being considered roaming.
      * Value is string array of MCCMNCs to be considered roaming for 3GPP RATs.
      */
@@ -267,7 +267,14 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL
             = "carrier_allow_turnoff_ims_bool";
 
-	/**
+    /**
+     * Flag specifying whether Generic Bootstrapping Architecture capable SIM is required for IMS.
+     * @hide
+     */
+    public static final String KEY_CARRIER_IMS_GBA_REQUIRED_BOOL
+            = "carrier_ims_gba_required_bool";
+
+    /**
      * Flag specifying whether IMS instant lettering is available for the carrier.  {@code True} if
      * instant lettering is available for the carrier, {@code false} otherwise.
      * @hide
@@ -319,7 +326,7 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL =
             "carrier_force_disable_etws_cmas_test_bool";
 
-	/**
+    /**
      * The default flag specifying whether "Turn on Notifications" option will be always shown in
      * Settings->More->Emergency broadcasts menu regardless developer options is turned on or not.
      * @hide
@@ -379,10 +386,10 @@ public class CarrierConfigManager {
     public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING =
             "ci_action_on_sys_update_extra_val_string";
 
-	/**
-     * Specifies the amount of gap to be added in millis between DTMF tones. When a non-zero value
-     * is specified, the UE shall wait for the specified amount of time before it sends out
-     * successive DTMF tones on the network.
+    /**
+     * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
+     * non-zero value is specified, the UE shall wait for the specified amount of time before it
+     * sends out successive DTMF tones on the network.
      * @hide
      */
     public static final String KEY_GSM_DTMF_TONE_DELAY_INT = "gsm_dtmf_tone_delay_int";
@@ -421,12 +428,26 @@ public class CarrierConfigManager {
     public static final String KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL = "hide_preferred_network_type_bool";
 
     /**
+     * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
+     * non-zero value is specified, the UE shall wait for the specified amount of time before it
+     * sends out successive DTMF tones on the network.
+     * @hide
+     */
+    public static final String KEY_CDMA_DTMF_TONE_DELAY_INT = "cdma_dtmf_tone_delay_int";
+
+    /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
      * information
      */
     public static final String KEY_CSP_ENABLED_BOOL = "csp_enabled_bool";
+
+    /**
+     * Allow user to add APNs
+     * @hide
+     */
+    public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
 
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
@@ -462,7 +483,7 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_UA_PROF_URL_STRING = "uaProfUrl";
     public static final String KEY_MMS_USER_AGENT_STRING = "userAgent";
 
-	/**
+    /**
      * Determines whether the carrier supports making non-emergency phone calls while the phone is
      * in emergency callback mode.  Default value is {@code true}, meaning that non-emergency calls
      * are allowed in emergency callback mode.
@@ -489,7 +510,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_CARRIER_ALLOW_TURNOFF_IMS_BOOL, true);
-		sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
         sDefaults.putBoolean(KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL, false);
@@ -502,7 +524,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
         sDefaults.putBoolean(KEY_PREFER_2G_BOOL, true);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
-        sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, true);
+        sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_ONSCREEN_DIAL_BUTTON_BOOL, true);
         sDefaults.putBoolean(KEY_SIM_NETWORK_UNLOCK_ALLOW_DISMISS_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_PAUSE_IMS_VIDEO_CALLS_BOOL, true);
@@ -511,8 +533,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_OTASP_FOR_PROVISIONING_BOOL, false);
         sDefaults.putBoolean(KEY_VOICEMAIL_NOTIFICATION_PERSISTENT_BOOL, false);
         sDefaults.putBoolean(KEY_VOICE_PRIVACY_DISABLE_UI_BOOL, false);
-        sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, true);
-		sDefaults.putBoolean(KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL, true);
+        sDefaults.putBoolean(KEY_WORLD_PHONE_BOOL, false);
+        sDefaults.putBoolean(KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL, true);
         sDefaults.putInt(KEY_VOLTE_REPLACEMENT_RAT_INT, 0);
         sDefaults.putString(KEY_DEFAULT_SIM_CALL_MANAGER_STRING, "");
         sDefaults.putString(KEY_VVM_DESTINATION_NUMBER_STRING, "");
@@ -524,19 +546,21 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
         sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
-		sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
+        sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
+        sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_FORCE_HOME_NETWORK_BOOL, false);
-		sDefaults.putInt(KEY_GSM_DTMF_TONE_DELAY_INT, 0);
+        sDefaults.putInt(KEY_GSM_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
+        sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
@@ -570,7 +594,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_UA_PROF_TAG_NAME_STRING, "x-wap-profile");
         sDefaults.putString(KEY_MMS_UA_PROF_URL_STRING, "");
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
-		sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
+        sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
     }
 
     /**
