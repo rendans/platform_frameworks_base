@@ -33,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.AdbOverNetworkTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
+import com.android.systemui.qs.tiles.AmbientDisplayTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
@@ -297,6 +298,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 		else if (tileSpec.equals("lockscreen")) return  new LockscreenToggleTile(this);
 		else if (tileSpec.equals("screen_off")) return  new ScreenOffTile(this);
 		else if (tileSpec.equals("reboot")) return  new RebootTile(this);
+		else if (tileSpec.equals("ambient_display")) return new AmbientDisplayTile(this);
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
     }
@@ -370,6 +372,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 		else if (spec.equals("lockscreen")) return R.string.quick_settings_lockscreen_label;
 		else if (spec.equals("screen_off")) return R.string.quick_settings_screen_off;
 		else if (spec.equals("reboot")) return R.string.quick_settings_reboot_label;
+		else if (spec.equals("ambient_display")) return R.string.quick_settings_ambient_display_label;
         return 0;
     }
 }
