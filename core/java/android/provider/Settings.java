@@ -3780,6 +3780,12 @@ public final class Settings {
          */
         public static final String QS_TILES = "sysui_qs_tiles";
 
+		/**
+         * Whether detail view for the location tile is enabled
+         * @hide
+         */
+        public static final String QS_LOCATION_ADVANCED = "qs_location_advanced";
+
         /**
          * Status bar carrier label
          * 0: Hide
